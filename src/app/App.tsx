@@ -496,12 +496,19 @@ export default function App() {
             </p>
           </div>
           {/* Photo */}
-          <div className="lg:w-[400px] xl:w-[500px] shrink-0 flex items-center">
+          <div className="lg:w-[400px] xl:w-[500px] shrink-0 relative flex items-center">
             <img
               src={imgFotoSobreMim1}
               alt="Foto sobre mim"
               className="w-full h-auto object-contain rounded-2xl"
             />
+            {/* Logo girando */}
+            <div
+              className="absolute top-4 left-1/2 -translate-x-1/2"
+              style={{ animation: "spin 6s linear infinite" }}
+            >
+              <SoartsLogo />
+            </div>
           </div>
         </div>
 
