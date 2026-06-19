@@ -496,11 +496,11 @@ export default function App() {
             </p>
           </div>
           {/* Photo */}
-          <div className="lg:w-[400px] xl:w-[500px] shrink-0">
+          <div className="lg:w-[400px] xl:w-[500px] shrink-0 flex items-center">
             <img
               src={imgFotoSobreMim1}
               alt="Foto sobre mim"
-              className="w-full h-[600px] object-cover object-top rounded-2xl"
+              className="w-full h-auto object-contain rounded-2xl"
             />
           </div>
         </div>
