@@ -304,7 +304,7 @@ function ContatoSection() {
       mensagem: form.mensagem || null,
     });
     if (error) {
-      setError("Erro ao enviar. Tente novamente.");
+      setError(`Erro: ${error.message}`);
     } else {
       setSent(true);
     }
