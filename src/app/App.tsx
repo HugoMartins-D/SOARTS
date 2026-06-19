@@ -504,7 +504,7 @@ export default function App() {
             />
             {/* Logo girando */}
             <div
-              className="absolute top-4 left-1/2 -translate-x-1/2"
+              className="absolute top-4 left-1/2 -translate-x-1/2 scale-[2.5]"
               style={{ animation: "spin 6s linear infinite" }}
             >
               <SoartsLogo />
