@@ -12,7 +12,89 @@ type MediaItem = {
   created_at: string;
 };
 
+type Contato = {
+  id: string;
+  nome: string | null;
+  empresa: string | null;
+  whatsapp: string;
+  instagram: string;
+  tipo_projeto: string;
+  investimento: string;
+  mensagem: string | null;
+  created_at: string;
+};
+
+function ContatosTab() {
+  const [contatos, setContatos] = useState<Contato[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("contatos")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setContatos((data as Contato[]) ?? []);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p className="text-white/30 text-sm">Carregando...</p>;
+  if (contatos.length === 0) return <p className="text-white/30 text-sm">Nenhuma resposta ainda.</p>;
+
+  return (
+    <div className="space-y-3">
+      {contatos.map((c) => (
+        <div key={c.id} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setExpanded(expanded === c.id ? null : c.id)}
+            className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/5 transition-colors"
+          >
+            <div>
+              <p className="font-semibold text-sm">{c.nome || "Sem nome"} {c.empresa ? `· ${c.empresa}` : ""}</p>
+              <p className="text-white/40 text-xs mt-0.5">{new Date(c.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+            </div>
+            <svg className={`w-4 h-4 text-white/40 transition-transform ${expanded === c.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {expanded === c.id && (
+            <div className="px-5 pb-5 grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-white/10 pt-4">
+              <div>
+                <p className="text-white/40 text-xs mb-0.5">WhatsApp</p>
+                <a href={`https://wa.me/55${c.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="text-[#ff9000] text-sm hover:underline">{c.whatsapp}</a>
+              </div>
+              <div>
+                <p className="text-white/40 text-xs mb-0.5">Instagram</p>
+                <p className="text-sm">{c.instagram}</p>
+              </div>
+              <div>
+                <p className="text-white/40 text-xs mb-0.5">Tipo de projeto</p>
+                <p className="text-sm">{c.tipo_projeto}</p>
+              </div>
+              <div>
+                <p className="text-white/40 text-xs mb-0.5">Investimento</p>
+                <p className="text-sm">{c.investimento}</p>
+              </div>
+              {c.mensagem && (
+                <div className="sm:col-span-2">
+                  <p className="text-white/40 text-xs mb-0.5">Mensagem</p>
+                  <p className="text-sm text-white/80 leading-relaxed">{c.mensagem}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminPage() {
+  const [adminTab, setAdminTab] = useState<"midia" | "contatos">("midia");
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -112,10 +194,10 @@ export default function AdminPage() {
       <div className="max-w-3xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">SOARTS Admin</h1>
-            <p className="text-white/40 text-sm">Gerenciamento de mídia</p>
+            <p className="text-white/40 text-sm">Gerenciamento de conteúdo</p>
           </div>
           <button
             onClick={handleLogout}
@@ -125,7 +207,27 @@ export default function AdminPage() {
           </button>
         </div>
 
+        {/* Abas */}
+        <div className="flex gap-3 mb-8">
+          {(["midia", "contatos"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setAdminTab(t)}
+              className={`px-6 py-2 rounded-full font-semibold text-sm border transition-colors ${
+                adminTab === t
+                  ? "bg-[#ff9000] border-[#ff9000] text-white"
+                  : "border-white/10 text-white/50 hover:border-white/30"
+              }`}
+            >
+              {t === "midia" ? "Mídia" : "Contatos"}
+            </button>
+          ))}
+        </div>
+
+        {adminTab === "contatos" ? <ContatosTab /> : null}
+
         {/* Upload Form */}
+        {adminTab === "midia" && (<>
         <form onSubmit={handleUpload} className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-10 space-y-4">
           <h2 className="font-bold text-lg mb-2">Novo upload</h2>
 
@@ -257,6 +359,7 @@ export default function AdminPage() {
             ))}
           </div>
         )}
+        </>)}
       </div>
     </div>
   );

@@ -279,6 +279,157 @@ function SoartsLogo() {
   );
 }
 
+function ContatoSection() {
+  const [form, setForm] = useState({ nome: "", empresa: "", whatsapp: "", instagram: "", tipo_projeto: "", investimento: "", mensagem: "" });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+
+  function set(field: string, value: string) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSending(true);
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.from("contatos").insert({
+      nome: form.nome || null,
+      empresa: form.empresa || null,
+      whatsapp: form.whatsapp,
+      instagram: form.instagram,
+      tipo_projeto: form.tipo_projeto,
+      investimento: form.investimento,
+      mensagem: form.mensagem || null,
+    });
+    if (error) {
+      setError("Erro ao enviar. Tente novamente.");
+    } else {
+      setSent(true);
+    }
+    setSending(false);
+  }
+
+  return (
+    <section id="contato" className="w-full px-8 md:px-16 py-20">
+      <div className="max-w-4xl mx-auto flex flex-col lg:flex-row gap-16 items-start">
+        {/* Texto */}
+        <div className="lg:w-80 shrink-0">
+          <h2 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4">
+            Pronto para posicionar sua marca?
+          </h2>
+          <p className="text-white/60 text-lg leading-relaxed">
+            Me conte sobre seu projeto e vamos construir algo que gere valor, conexão e resultado.
+          </p>
+        </div>
+
+        {/* Formulário */}
+        <div className="flex-1 w-full">
+          {sent ? (
+            <div className="bg-[#ff9000]/10 border border-[#ff9000]/30 rounded-2xl p-10 text-center">
+              <p className="text-2xl font-bold mb-2">Mensagem enviada!</p>
+              <p className="text-white/60">Em breve entro em contato.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white/70 text-sm block mb-1">Nome</label>
+                  <input
+                    type="text"
+                    value={form.nome}
+                    onChange={(e) => set("nome", e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-white/70 text-sm block mb-1">Empresa/Marca</label>
+                  <input
+                    type="text"
+                    value={form.empresa}
+                    onChange={(e) => set("empresa", e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-white/70 text-sm block mb-1">WhatsApp <span className="text-[#ff9000]">*</span></label>
+                <input
+                  type="text"
+                  value={form.whatsapp}
+                  onChange={(e) => set("whatsapp", e.target.value)}
+                  required
+                  placeholder="(00) 00000-0000"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Instagram <span className="text-[#ff9000]">*</span></label>
+                <input
+                  type="text"
+                  value={form.instagram}
+                  onChange={(e) => set("instagram", e.target.value)}
+                  required
+                  placeholder="@usuario"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Tipo de projeto <span className="text-[#ff9000]">*</span></label>
+                <input
+                  type="text"
+                  value={form.tipo_projeto}
+                  onChange={(e) => set("tipo_projeto", e.target.value)}
+                  required
+                  placeholder="Ex: vídeo institucional, reels, cobertura de evento..."
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Investimento <span className="text-[#ff9000]">*</span></label>
+                <input
+                  type="text"
+                  value={form.investimento}
+                  onChange={(e) => set("investimento", e.target.value)}
+                  required
+                  placeholder="Ex: R$ 1.000 - R$ 3.000"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-white/70 text-sm block mb-1">Me conte sobre o projeto que você quer criar</label>
+                <textarea
+                  value={form.mensagem}
+                  onChange={(e) => set("mensagem", e.target.value)}
+                  rows={4}
+                  placeholder="Insira uma resposta aqui"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/20 focus:outline-none focus:border-[#ff9000] transition-colors resize-none"
+                />
+              </div>
+
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={sending}
+                className="w-full bg-[#ff9000] text-white text-lg font-bold py-4 rounded-full hover:bg-[#e08000] transition-colors disabled:opacity-50"
+              >
+                {sending ? "Enviando..." : "Enviar mensagem"}
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   return (
     <div className="bg-black min-h-screen font-['Inter',sans-serif] text-white">
@@ -380,6 +531,9 @@ export default function App() {
           <img src={imgHelp} alt="HelpSmart" className="h-10 object-contain opacity-90 hover:opacity-100 transition-opacity" />
         </div>
       </section>
+
+      {/* CONTATO */}
+      <ContatoSection />
 
       {/* FOOTER */}
       <footer className="w-full py-10 border-t border-white/10 text-center">
