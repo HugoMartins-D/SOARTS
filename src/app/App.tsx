@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import imgArteHome1 from "@/imports/LpSoarts-1/18e8e1526bce6171fc812f220318b02f70d54c1c.png";
 import imgFotoSobreMim1 from "@/imports/LpSoarts-1/62e6d952a145ea13a362f06ec0abb6a9b6a95ec0.png";
 import imgPromenac from "@/imports/LpSoarts-1/4f9ded526e079a81f945748a1d5b20399db88462.png";
@@ -5,6 +6,137 @@ import imgGlobo from "@/imports/LpSoarts-1/ebd2fbc1227c2348e8af1bd608466186a92ed
 import imgHelp from "@/imports/LpSoarts-1/9a24a967396e3a96c514b6606d83fbc921a8502e.png";
 import imgPixel from "@/imports/LpSoarts-1/53e6e0a0c85759b6fc7455999a19d4d8698285ab.png";
 import svgPaths from "@/imports/LpSoarts-1/svg-0n58f4rxvu";
+import { createClient } from "@/utils/supabase/client";
+
+type MediaItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  type: "video" | "foto";
+  file_url: string;
+};
+
+function ProjetosSection() {
+  const [tab, setTab] = useState<"video" | "foto">("video");
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<MediaItem | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase
+      .from("media")
+      .select("id, title, description, type, file_url")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        setMedia((data as MediaItem[]) ?? []);
+        setLoading(false);
+      });
+  }, []);
+
+  const filtered = media.filter((m) => m.type === tab);
+
+  return (
+    <section id="projetos" className="w-full px-8 md:px-16 py-20">
+      <p className="text-white/60 text-xl tracking-widest mb-4">PROJETOS</p>
+      <p className="text-4xl md:text-6xl font-extrabold text-center leading-tight max-w-4xl mx-auto mb-10">
+        O mundo através da minha lente
+      </p>
+
+      {/* Abas */}
+      <div className="flex gap-4 mb-10">
+        {(["video", "foto"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-6 py-2 rounded-full font-semibold text-sm border transition-colors ${
+              tab === t
+                ? "bg-[#ff9000] border-[#ff9000] text-white"
+                : "border-white/20 text-white/50 hover:border-white/50"
+            }`}
+          >
+            {t === "video" ? "Vídeos" : "Fotos"}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="aspect-video bg-white/5 rounded-xl animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <p className="text-white/30 text-center py-16">Nenhum conteúdo ainda.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => setSelected(item)}
+              className="aspect-video rounded-xl overflow-hidden cursor-pointer group relative bg-white/5 border border-white/10 hover:border-[#ff9000]/50 transition-colors"
+            >
+              {item.type === "foto" ? (
+                <img
+                  src={item.file_url}
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <video
+                  src={item.file_url}
+                  className="w-full h-full object-cover"
+                  muted
+                  onMouseEnter={(e) => (e.currentTarget as HTMLVideoElement).play()}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLVideoElement).pause(); (e.currentTarget as HTMLVideoElement).currentTime = 0; }}
+                />
+              )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+                <p className="text-white font-semibold text-sm">{item.title}</p>
+              </div>
+              {item.type === "video" && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-12 h-12 rounded-full bg-[#ff9000]/80 flex items-center justify-center group-hover:opacity-0 transition-opacity">
+                    <svg className="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal lightbox */}
+      {selected && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelected(null)}
+        >
+          <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+            {selected.type === "foto" ? (
+              <img src={selected.file_url} alt={selected.title} className="w-full max-h-[80vh] object-contain rounded-xl" />
+            ) : (
+              <video src={selected.file_url} controls autoPlay className="w-full max-h-[80vh] rounded-xl" />
+            )}
+            <div className="mt-4 flex items-start justify-between">
+              <div>
+                <p className="text-white font-bold text-lg">{selected.title}</p>
+                {selected.description && <p className="text-white/50 text-sm mt-1">{selected.description}</p>}
+              </div>
+              <button onClick={() => setSelected(null)} className="text-white/50 hover:text-white ml-4 shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function SoartsLogo() {
   return (
@@ -189,29 +321,7 @@ export default function App() {
       </section>
 
       {/* PROJETOS */}
-      <section id="projetos" className="w-full px-8 md:px-16 py-20">
-        <p className="text-white/60 text-xl tracking-widest mb-12">PROJETOS</p>
-        <div className="w-full flex items-center justify-center">
-          <p className="text-4xl md:text-6xl font-extrabold text-center leading-tight max-w-4xl">
-            O mundo através da minha lente
-          </p>
-        </div>
-        {/* Project grid placeholder — dark cards */}
-        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="aspect-video bg-white/5 border border-white/10 rounded-xl flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <div className="w-16 h-16 rounded-full bg-[#ff9000]/20 border border-[#ff9000]/40 flex items-center justify-center">
-                <svg className="w-7 h-7 text-[#ff9000] ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ProjetosSection />
 
       {/* SOBRE MIM */}
       <section id="sobre" className="w-full px-8 md:px-16 py-20">
