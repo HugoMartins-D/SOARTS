@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, useInView, useReducedMotion } from "motion/react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ArrowLeft, ArrowRight, Camera, Menu, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUp, Camera, Instagram, Menu, Play, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
 import { GooeyRevealHero } from "@/app/components/hero/gooey-reveal-hero";
 import { FranciscoCard } from "@/app/components/sobre/francisco-card";
@@ -778,6 +778,117 @@ function ContatoSection() {
   );
 }
 
+const FOOTER_MARQUEE_REPEATS = 8;
+
+function Footer() {
+  return (
+    <footer className="relative w-full border-t border-white/10 overflow-hidden">
+      {/* Faixa animada — reaproveita a mesma animação .marquee-track do
+          carrossel de logos, só com texto grande alternando preenchido e
+          contornado. A faixa inteira é um link pro contato. */}
+      <a
+        href="#contato"
+        aria-label="Ir para o formulário de contato"
+        className="group relative block py-6 md:py-9 border-b border-white/10 overflow-hidden"
+      >
+        <div className="marquee-track flex items-center gap-10 w-max group-hover:[animation-play-state:paused]">
+          {Array.from({ length: 2 }).map((_, setIdx) => (
+            <div key={setIdx} className="flex items-center gap-10 shrink-0">
+              {Array.from({ length: FOOTER_MARQUEE_REPEATS }).map((_, i) => (
+                <span key={i} className="flex items-center gap-10 shrink-0">
+                  <span
+                    className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight whitespace-nowrap"
+                    style={
+                      i % 2 === 0
+                        ? { color: "rgba(255,255,255,0.9)" }
+                        : { color: "transparent", WebkitTextStroke: "1.5px rgba(255,255,255,0.35)" }
+                    }
+                  >
+                    Vamos criar juntos
+                  </span>
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ORANGE }} />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </a>
+
+      <div className="px-6 md:px-16 py-14 grid gap-10 md:grid-cols-[1.2fr_1fr_1fr]">
+        {/* Marca */}
+        <div>
+          <a href="#inicio" className="inline-flex items-center gap-3 mb-4">
+            <SoartsLogo />
+            <span className="font-extrabold text-xl tracking-wide">SOARTS</span>
+          </a>
+          <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-4">
+            Vídeo que posiciona marcas — do conceito à entrega, unindo estética e estratégia.
+          </p>
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: ORANGE, animation: "francisco-pulse 2.2s ease-out infinite" }}
+            />
+            <span className="text-white/50 text-xs tracking-wide">Disponível para novos projetos</span>
+          </div>
+        </div>
+
+        {/* Navegação */}
+        <div>
+          <p className="text-xs tracking-[0.3em] font-semibold text-white/40 mb-4">NAVEGAÇÃO</p>
+          <ul className="space-y-2.5">
+            {NAV_LINKS.map((l) => (
+              <li key={l.href}>
+                <a href={l.href} className="text-white/70 text-sm hover:text-[#FF5200] transition-colors">
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Contato */}
+        <div>
+          <p className="text-xs tracking-[0.3em] font-semibold text-white/40 mb-4">CONTATO</p>
+          <a
+            href="https://www.instagram.com/chicaomaker/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-white/70 text-sm hover:text-[#FF5200] transition-colors mb-4"
+          >
+            <Instagram className="w-4 h-4" />
+            @chicaomaker
+          </a>
+          <a
+            href="#contato"
+            className="flex items-center gap-2 text-white text-sm font-semibold w-fit rounded-full px-5 py-2.5 transition-colors"
+            style={{ backgroundColor: ORANGE }}
+          >
+            Enviar mensagem
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+
+      <div className="px-6 md:px-16 py-6 border-t border-white/10 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+        <p className="font-['Montserrat',sans-serif] text-white/40 text-xs tracking-widest text-center sm:text-left">
+          DIREITOS RESERVADOS SOARTS - 2026
+        </p>
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="group/top inline-flex items-center gap-2 text-white/50 text-xs tracking-widest hover:text-white transition-colors"
+        >
+          VOLTAR AO TOPO
+          <span className="w-7 h-7 rounded-full border border-white/15 flex items-center justify-center transition-all group-hover/top:border-white/40 group-hover/top:-translate-y-0.5">
+            <ArrowUp className="w-3.5 h-3.5" />
+          </span>
+        </button>
+      </div>
+    </footer>
+  );
+}
+
 export default function App() {
   return (
     <div className="bg-black min-h-screen font-['Inter',sans-serif] text-white">
@@ -960,12 +1071,7 @@ export default function App() {
       {/* CONTATO */}
       <ContatoSection />
 
-      {/* FOOTER */}
-      <footer className="w-full py-10 border-t border-white/10 text-center">
-        <p className="font-['Montserrat',sans-serif] text-white/70 text-base tracking-widest">
-          DIREITOS RESERVADOS SOARTS - 2026
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }
