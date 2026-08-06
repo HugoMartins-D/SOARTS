@@ -805,7 +805,7 @@ function Footer() {
                     style={
                       i % 2 === 0
                         ? { color: "rgba(255,255,255,0.9)" }
-                        : { color: "transparent", WebkitTextStroke: "1.5px rgba(255,255,255,0.35)" }
+                        : { color: "transparent", WebkitTextStroke: "1.5px rgba(255,255,255,0.8)" }
                     }
                   >
                     Vamos criar juntos
