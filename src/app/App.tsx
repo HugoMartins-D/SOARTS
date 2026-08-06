@@ -734,7 +734,7 @@ export default function App() {
       {/* HERO */}
       <GooeyRevealHero
         id="inicio"
-        className="relative w-full min-h-screen flex flex-col justify-start lg:justify-center overflow-hidden"
+        className="relative w-full max-w-[1800px] mx-auto min-h-screen flex flex-col justify-start lg:justify-center overflow-hidden"
         /*
          * Mesmo clique em dois tratamentos: a base é a versão neutra e a
          * revelada é a versão com grade quente/laranja, que combina com o
@@ -764,7 +764,7 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/10 to-transparent pointer-events-none" />
 
         <div className="relative z-10 w-full px-6 md:px-16 pt-28 sm:pt-32 pb-10 lg:py-0">
-          <div className="max-w-xl mx-auto lg:mx-0 flex flex-col items-center lg:items-start text-center lg:text-left">
+          <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <span className="w-8 h-px shrink-0" style={{ backgroundColor: ORANGE }} />
               <span className="text-xs md:text-sm tracking-[0.3em] font-semibold text-white/80">
