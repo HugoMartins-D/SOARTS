@@ -792,7 +792,7 @@ export default function App() {
       {/* HERO */}
       <GooeyRevealHero
         id="inicio"
-        className="relative w-full max-w-[1800px] mx-auto min-h-screen flex flex-col justify-start lg:justify-center overflow-hidden"
+        className="relative isolate w-full max-w-[1800px] mx-auto min-h-screen flex flex-col justify-start lg:justify-center overflow-hidden"
         /*
          * Mesmo clique em dois tratamentos: a base é a versão neutra e a
          * revelada é a versão com grade quente/laranja, que combina com o
@@ -833,18 +833,18 @@ export default function App() {
               waveColor="#FF5200"
               crestColor="#FFD9C2"
               speed={0.25}
-              amplitude={1.4}
+              amplitude={2.2}
               waveScale={0.6}
               waveRatio={0.9}
               swell={35}
               turbulence={20}
-              tilt={1.11}
+              tilt={0.75}
               zoom={1.0}
-              height={5.5}
-              fogDepth={15}
+              height={3}
+              fogDepth={30}
               detail="low"
-              brightness={0.8}
-              opacity={0.55}
+              brightness={0.9}
+              opacity={0.6}
               mouseInteraction={true}
               parallaxStrength={0.4}
               grain={true}
