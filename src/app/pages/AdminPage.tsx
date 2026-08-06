@@ -293,7 +293,7 @@ function Dashboard() {
                   <div key={project.id} className="liquid-glass rounded-2xl overflow-hidden">
                     <div className="aspect-video bg-black/40 relative">
                       {isVideoPreview ? (
-                        <video src={publicMediaUrl(previewPath)} muted className="w-full h-full object-cover" />
+                        <video src={publicMediaUrl(previewPath)} muted className="w-full h-full object-contain bg-black" />
                       ) : (
                         <img
                           src={publicMediaUrl(previewPath)}

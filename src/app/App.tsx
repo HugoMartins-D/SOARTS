@@ -129,7 +129,7 @@ function ProjectSlide({ project }: { project: Project }) {
           poster={project.image}
           controls
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-black"
         />
       ) : project.image ? (
         <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />
@@ -271,7 +271,7 @@ function ProjetosSection() {
                   muted
                   loop
                   playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain bg-black"
                   onMouseEnter={(e) => e.currentTarget.play()}
                   onMouseLeave={(e) => {
                     e.currentTarget.pause();
