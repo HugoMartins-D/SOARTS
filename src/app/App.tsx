@@ -28,6 +28,17 @@ const BRANDS = [
 ];
 
 /**
+ * PLACEHOLDER — números fictícios só pra aprovação de layout com o cliente.
+ * Trocar pelos números reais antes de publicar (autorizado pelo Hugo em
+ * 2026-08-06 especificamente pra essa revisão; não são dados verdadeiros).
+ */
+const HERO_STATS = [
+  { value: "+150", label: "Projetos entregues" },
+  { value: "+50M", label: "Visualizações geradas" },
+  { value: "+80", label: "Marcas atendidas" },
+];
+
+/**
  * Placeholders exibidos só até o primeiro projeto real ser cadastrado em
  * /admin — assim que a tabela `projects` do Supabase tiver alguma linha,
  * ela substitui esse array inteiro (ver `ProjetosSection`).
@@ -764,7 +775,8 @@ export default function App() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/10 to-transparent pointer-events-none" />
 
         <div className="relative z-10 w-full px-6 md:px-16 pt-28 sm:pt-32 pb-10 lg:py-0">
-          <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 flex flex-col items-center lg:items-start text-center lg:text-left">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-10 xl:gap-20">
+          <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 shrink-0 flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <span className="w-8 h-px shrink-0" style={{ backgroundColor: ORANGE }} />
               <span className="text-xs md:text-sm tracking-[0.3em] font-semibold text-white/80">
@@ -807,6 +819,24 @@ export default function App() {
                 Ver projetos
               </a>
             </div>
+          </div>
+
+          {/*
+            PLACEHOLDER — ver HERO_STATS acima. Só aparece em telas grandes
+            (lg+), onde sobra vazio entre o texto e o retrato.
+          */}
+          <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
+            {HERO_STATS.map((stat) => (
+              <div key={stat.label}>
+                <p className="text-4xl xl:text-5xl font-extrabold leading-none" style={{ color: ORANGE }}>
+                  {stat.value}
+                </p>
+                <p className="text-xs tracking-[0.2em] uppercase text-white/50 mt-2 max-w-[7rem]">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
           </div>
         </div>
 
