@@ -1,0 +1,232 @@
+/* SOARTS — cinema portfolio design tokens & liquid glass system */
+
+:root {
+  --brand-orange: #ff5200;
+  --brand-orange-dim: #cc4200;
+}
+
+/* O enquadramento do hero não vive mais aqui: as duas camadas são <image>
+   dentro de um único SVG e compartilham o mesmo `preserveAspectRatio`, exposto
+   como a prop `fit` de src/app/components/hero/gooey-reveal-hero.tsx. Isso
+   garante alinhamento por construção, sem media query nenhuma. */
+
+::selection {
+  background: var(--brand-orange);
+  color: #000;
+}
+
+/* -------------------------------------------------- */
+/* Liquid Glass                                        */
+/* Refraction/blur "wow" effect for overlays, nav, cards */
+/* -------------------------------------------------- */
+
+.liquid-glass {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.14),
+    rgba(255, 255, 255, 0.02) 55%,
+    rgba(255, 255, 255, 0.06)
+  );
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    inset 0 -12px 20px -12px rgba(0, 0, 0, 0.5),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    120% 100% at 15% 0%,
+    rgba(255, 255, 255, 0.16),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.liquid-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.06) 45%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* Thin variant used for the fixed navbar */
+.liquid-glass-nav {
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Orange-tinted glass, for hover/active states */
+.liquid-glass-accent {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 82, 0, 0.28),
+    rgba(255, 82, 0, 0.06) 60%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 82, 0, 0.4);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    0 8px 28px rgba(255, 82, 0, 0.18);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Carrossel automático de logos (seção "Marcas"). A trilha contém o array
+   duplicado; -50% é exatamente a largura de UM conjunto, então o loop fecha
+   sem salto. */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------- */
+/* Cartão de perfil (seção "Sobre Mim")                */
+/* Consumido por src/app/components/sobre/francisco-card.tsx */
+/* -------------------------------------------------- */
+
+.francisco-card {
+  --fc-panel: #18130f;
+  --fc-panel-2: #221b15;
+  --fc-hairline: rgba(255, 240, 225, 0.09);
+  --fc-mist: #d9d1c6;
+  --fc-ember: #ffb08a;
+
+  position: relative;
+  padding: 28px 24px 24px;
+  border-radius: 30px;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015) 55%, rgba(255, 255, 255, 0.03)),
+    var(--fc-panel);
+  border: 1px solid var(--fc-hairline);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    inset 0 -18px 30px -20px rgba(0, 0, 0, 0.65),
+    0 30px 60px -20px rgba(0, 0, 0, 0.65),
+    0 8px 20px -10px rgba(255, 82, 0, 0.18);
+}
+
+.francisco-card__name {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 2.55rem);
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: #f7f1e8;
+}
+
+.francisco-card__name span {
+  color: var(--brand-orange);
+}
+
+.francisco-card__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-orange);
+  animation: francisco-pulse 2.2s ease-out infinite;
+}
+
+@keyframes francisco-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(255, 82, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 82, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .francisco-card__dot {
+    animation: none;
+  }
+}
+
+.francisco-card__slot {
+  /*
+   * Medido a partir da foto real (ver notas do card em
+   * francisco-card.tsx): o cabelo começa a 18.8% da altura, e a camisa só
+   * vira largura-total a partir de ~70%. A altura 400px (contra uma
+   * largura de painel de ~312-560px, dependendo do breakpoint) dá janela
+   * suficiente para mostrar da testa até dentro da zona onde a camisa já
+   * preenche a largura toda — assim o único "corte" que sobra é a borda
+   * do próprio painel, não um corte no meio do corpo. Se troca a foto,
+   * remeça essa medição antes de reusar os números abaixo.
+   */
+  position: relative;
+  height: 400px;
+  border-radius: 22px;
+  border: 1px solid var(--fc-hairline);
+  overflow: hidden;
+  background-color: var(--fc-panel-2);
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, 120% 100%;
+  background-position: 50% 53%, 30% -10%;
+}
+
+.francisco-card__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--fc-hairline);
+  background-repeat: no-repeat;
+  background-size: 220% auto;
+  background-position: 50% 42%;
+}
+
+.francisco-card__cta {
+  background: linear-gradient(180deg, #ff6a1f, var(--brand-orange));
+  color: #0c0a09;
+  box-shadow: 0 8px 18px -6px rgba(255, 82, 0, 0.55);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.francisco-card__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -6px rgba(255, 82, 0, 0.65);
+}
+
+.francisco-card__cta:active {
+  transform: translateY(0);
+}
+
+.francisco-card__cta:focus-visible {
+  outline: 2px solid var(--fc-ember);
+  outline-offset: 2px;
+}
