@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { animate, useInView, useReducedMotion } from "motion/react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeft, ArrowRight, Camera, Menu, Play, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
@@ -31,11 +32,12 @@ const BRANDS = [
  * PLACEHOLDER — números fictícios só pra aprovação de layout com o cliente.
  * Trocar pelos números reais antes de publicar (autorizado pelo Hugo em
  * 2026-08-06 especificamente pra essa revisão; não são dados verdadeiros).
+ * `value` fica separado de prefixo/sufixo pra dar pra animar só o número.
  */
 const HERO_STATS = [
-  { value: "+150", label: "Projetos entregues" },
-  { value: "+50M", label: "Visualizações geradas" },
-  { value: "+80", label: "Marcas atendidas" },
+  { value: 150, prefix: "+", suffix: "", label: "Projetos entregues" },
+  { value: 50, prefix: "+", suffix: "M", label: "Visualizações geradas" },
+  { value: 80, prefix: "+", suffix: "", label: "Marcas atendidas" },
 ];
 
 /**
@@ -538,6 +540,48 @@ function SoartsLogo() {
   );
 }
 
+function CountUpStat({
+  value,
+  prefix = "",
+  suffix = "",
+  label,
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  label: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.6 });
+  const prefersReducedMotion = useReducedMotion();
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    if (prefersReducedMotion) {
+      setDisplay(value);
+      return;
+    }
+    const controls = animate(0, value, {
+      duration: 1.6,
+      ease: "easeOut",
+      onUpdate: (v) => setDisplay(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [isInView, value, prefersReducedMotion]);
+
+  return (
+    <div ref={ref}>
+      <p className="text-4xl xl:text-5xl font-extrabold leading-none tabular-nums" style={{ color: ORANGE }}>
+        {prefix}
+        {display}
+        {suffix}
+      </p>
+      <p className="text-xs tracking-[0.2em] uppercase text-white/50 mt-2 max-w-[7rem]">{label}</p>
+    </div>
+  );
+}
+
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -827,14 +871,7 @@ export default function App() {
           */}
           <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
             {HERO_STATS.map((stat) => (
-              <div key={stat.label}>
-                <p className="text-4xl xl:text-5xl font-extrabold leading-none" style={{ color: ORANGE }}>
-                  {stat.value}
-                </p>
-                <p className="text-xs tracking-[0.2em] uppercase text-white/50 mt-2 max-w-[7rem]">
-                  {stat.label}
-                </p>
-              </div>
+              <CountUpStat key={stat.label} {...stat} />
             ))}
           </div>
           </div>
