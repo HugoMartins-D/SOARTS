@@ -20,8 +20,27 @@
 /* Refraction/blur "wow" effect for overlays, nav, cards */
 /* -------------------------------------------------- */
 
+/*
+ * Duas camadas de proteção pra não brigar com `absolute`/`fixed` do Tailwind
+ * na mesma tag (ex: botão de fechar do modal, com `absolute liquid-glass`):
+ *
+ * 1. `@layer utilities` — CSS fora de qualquer layer SEMPRE vence CSS dentro
+ *    de uma layer, não importa a especificidade (é assim que a cascata do
+ *    CSS define layers). O Tailwind v4 gera seus utilitários dentro de
+ *    `@layer utilities`; como este arquivo era importado solto (sem layer),
+ *    ele vencia o Tailwind sempre, mesmo com `:where()`. Colocando aqui
+ *    dentro da mesma layer, as duas regras voltam a competir por
+ *    especificidade normalmente.
+ * 2. `:where()` — dentro da layer, zera a especificidade da nossa regra pra
+ *    o utilitário do Tailwind (`.absolute`, especificidade 0,1,0) ganhar.
+ */
+@layer utilities {
+  :where(.liquid-glass) {
+    position: relative;
+  }
+}
+
 .liquid-glass {
-  position: relative;
   isolation: isolate;
   background: linear-gradient(
     135deg,
