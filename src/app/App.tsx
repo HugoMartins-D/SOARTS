@@ -29,15 +29,12 @@ const BRANDS = [
 ];
 
 /**
- * PLACEHOLDER — números fictícios só pra aprovação de layout com o cliente.
- * Trocar pelos números reais antes de publicar (autorizado pelo Hugo em
- * 2026-08-06 especificamente pra essa revisão; não são dados verdadeiros).
  * `value` fica separado de prefixo/sufixo pra dar pra animar só o número.
  */
 const HERO_STATS = [
-  { value: 150, prefix: "+", suffix: "", label: "Projetos entregues" },
-  { value: 50, prefix: "+", suffix: "M", label: "Visualizações geradas" },
-  { value: 80, prefix: "+", suffix: "", label: "Marcas atendidas" },
+  { value: 700, prefix: "+", suffix: "", label: "Projetos entregues" },
+  { value: 75, prefix: "+", suffix: " mil", label: "Visualizações geradas" },
+  { value: 50, prefix: "+", suffix: "", label: "Marcas atendidas" },
 ];
 
 /**
@@ -865,10 +862,7 @@ export default function App() {
             </div>
           </div>
 
-          {/*
-            PLACEHOLDER — ver HERO_STATS acima. Só aparece em telas grandes
-            (lg+), onde sobra vazio entre o texto e o retrato.
-          */}
+          {/* Só aparece em telas grandes (lg+), onde sobra vazio entre o texto e o retrato. */}
           <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
             {HERO_STATS.map((stat) => (
               <CountUpStat key={stat.label} {...stat} />
