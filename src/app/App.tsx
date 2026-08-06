@@ -225,39 +225,43 @@ function ProjetosSection() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex gap-2">
-              {filtered.map((_, i) => (
-                <span
-                  key={i}
-                  className="h-1.5 rounded-full transition-all"
-                  style={{
-                    width: i === selectedIndex ? "2rem" : "0.375rem",
-                    backgroundColor: i === selectedIndex ? ORANGE : "rgba(255,255,255,0.2)",
-                  }}
-                />
-              ))}
+          {filtered.length > 1 && (
+            <div className="flex items-center justify-between mt-6">
+              <div className="flex gap-2">
+                {filtered.map((_, i) => (
+                  <span
+                    key={i}
+                    className="h-1.5 rounded-full transition-all"
+                    style={{
+                      width: i === selectedIndex ? "2rem" : "0.375rem",
+                      backgroundColor: i === selectedIndex ? ORANGE : "rgba(255,255,255,0.2)",
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  aria-label="Projeto anterior"
+                  onClick={() => emblaApi?.scrollPrev()}
+                  className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button
+                  aria-label="Próximo projeto"
+                  onClick={() => emblaApi?.scrollNext()}
+                  className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                aria-label="Projeto anterior"
-                onClick={() => emblaApi?.scrollPrev()}
-                className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <button
-                aria-label="Próximo projeto"
-                onClick={() => emblaApi?.scrollNext()}
-                className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
-              >
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Grade de mídia */}
+        {/* Grade de mídia — só faz sentido pra folhear quando há mais de um
+            projeto; com um só, ela apenas repetia o mesmo card do carrossel. */}
+        {filtered.length > 1 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-20">
           {filtered.map((project) => (
             <div
@@ -294,6 +298,7 @@ function ProjetosSection() {
             </div>
           ))}
         </div>
+        )}
       </div>
     </section>
   );
