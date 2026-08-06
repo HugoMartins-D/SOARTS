@@ -149,9 +149,69 @@ function ProjectSlide({ project }: { project: Project }) {
   );
 }
 
+function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 bg-black/80 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="liquid-glass rounded-3xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={cn("relative aspect-video overflow-hidden rounded-t-3xl bg-gradient-to-br", project.gradient)}>
+          {project.video ? (
+            <video
+              src={project.video}
+              poster={project.image}
+              controls
+              autoPlay
+              playsInline
+              className="absolute inset-0 w-full h-full object-contain bg-black"
+            />
+          ) : project.image ? (
+            <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-contain bg-black" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <CategoryIcon category={project.category} className="w-14 h-14 text-white/10" />
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            aria-label="Fechar"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full liquid-glass flex items-center justify-center hover:border-white/40 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="p-6 md:p-8">
+          <span className="text-xs tracking-[0.2em] font-semibold uppercase" style={{ color: ORANGE }}>
+            {project.tag}
+          </span>
+          <h3 className="text-2xl md:text-3xl font-bold mt-1 mb-3">{project.title}</h3>
+          <p className="text-white/70 text-base md:text-lg leading-relaxed">{project.description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ProjetosSection() {
   const [tab, setTab] = useState<"video" | "foto">("video");
   const [dbProjects, setDbProjects] = useState<Project[] | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -266,7 +326,19 @@ function ProjetosSection() {
           {filtered.map((project) => (
             <div
               key={project.id}
-              className={cn("group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br", project.gradient)}
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelectedProject(project)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedProject(project);
+                }
+              }}
+              className={cn(
+                "group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+                project.gradient,
+              )}
             >
               {project.video ? (
                 <video
@@ -300,6 +372,10 @@ function ProjetosSection() {
         </div>
         )}
       </div>
+
+      {selectedProject && (
+        <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+      )}
     </section>
   );
 }
