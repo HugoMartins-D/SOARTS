@@ -133,49 +133,67 @@ export function GooeyRevealHero({
 
   useEffect(() => {
     if (!effectEnabled) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const handleMove = (event: MouseEvent) => {
-      const container = containerRef.current;
-      if (!container) return;
+    // `getBoundingClientRect()` força um reflow síncrono — chamar isso a
+    // cada `mousemove` (que dispara centenas de vezes por segundo) era o
+    // que travava o rastro. Medindo só uma vez e recalculando apenas em
+    // resize/scroll, o handler de movimento vira leitura pura, sem custo
+    // de layout.
+    let bounds = container.getBoundingClientRect();
+    const updateBounds = () => {
+      bounds = container.getBoundingClientRect();
+    };
+    window.addEventListener("resize", updateBounds);
+    window.addEventListener("scroll", updateBounds, { passive: true });
 
-      const bounds = container.getBoundingClientRect();
-      const inside =
-        event.clientX >= bounds.left &&
-        event.clientX <= bounds.right &&
-        event.clientY >= bounds.top &&
-        event.clientY <= bounds.bottom;
+    // Escutando no container (não em `window`) o pointermove só dispara
+    // sobre o hero, e enter/leave já dão o estado "dentro" de graça, sem
+    // precisar comparar coordenadas a cada evento.
+    const handleMove = (event: PointerEvent) => {
+      const x = event.clientX - bounds.left;
+      const y = event.clientY - bounds.top;
 
-      setIsHovering(inside);
-
-      if (!inside) {
-        mouseXRatio.set(0);
-        mouseYRatio.set(0);
-        return;
-      }
-
-      mouseXRatio.set(((event.clientX - bounds.left) / bounds.width) * 2 - 1);
-      mouseYRatio.set(((event.clientY - bounds.top) / bounds.height) * 2 - 1);
+      mouseXRatio.set((x / bounds.width) * 2 - 1);
+      mouseYRatio.set((y / bounds.height) * 2 - 1);
 
       // O SVG não tem viewBox e preenche o container, então uma unidade de
       // usuário do SVG é um pixel CSS e estas coordenadas servem direto para
       // os círculos da máscara.
-      mouseX.set(event.clientX - bounds.left);
-      mouseY.set(event.clientY - bounds.top);
+      mouseX.set(x);
+      mouseY.set(y);
     };
 
-    window.addEventListener("mousemove", handleMove);
-    return () => window.removeEventListener("mousemove", handleMove);
+    const handleEnter = () => setIsHovering(true);
+    const handleLeave = () => {
+      setIsHovering(false);
+      mouseXRatio.set(0);
+      mouseYRatio.set(0);
+    };
+
+    container.addEventListener("pointermove", handleMove);
+    container.addEventListener("pointerenter", handleEnter);
+    container.addEventListener("pointerleave", handleLeave);
+
+    return () => {
+      window.removeEventListener("resize", updateBounds);
+      window.removeEventListener("scroll", updateBounds);
+      container.removeEventListener("pointermove", handleMove);
+      container.removeEventListener("pointerenter", handleEnter);
+      container.removeEventListener("pointerleave", handleLeave);
+    };
   }, [effectEnabled, mouseX, mouseY, mouseXRatio, mouseYRatio]);
 
   // Rastro do cursor: rigidez decrescente faz cada círculo chegar mais tarde,
   // criando a cauda. Declarados um a um de propósito — gerar isto num laço
   // chamaria hooks dentro de função e quebra as regras de hooks.
-  const headX = useSpring(mouseX, { stiffness: 250, damping: 30 });
-  const headY = useSpring(mouseY, { stiffness: 250, damping: 30 });
-  const bodyOneX = useSpring(mouseX, { stiffness: 220, damping: 34 });
-  const bodyOneY = useSpring(mouseY, { stiffness: 220, damping: 34 });
-  const bodyTwoX = useSpring(mouseX, { stiffness: 190, damping: 38 });
-  const bodyTwoY = useSpring(mouseY, { stiffness: 190, damping: 38 });
+  const headX = useSpring(mouseX, { stiffness: 420, damping: 38 });
+  const headY = useSpring(mouseY, { stiffness: 420, damping: 38 });
+  const bodyOneX = useSpring(mouseX, { stiffness: 340, damping: 36 });
+  const bodyOneY = useSpring(mouseY, { stiffness: 340, damping: 36 });
+  const bodyTwoX = useSpring(mouseX, { stiffness: 260, damping: 34 });
+  const bodyTwoY = useSpring(mouseY, { stiffness: 260, damping: 34 });
 
   // Satélite orbitando a cabeça do rastro, para a silhueta nunca virar um círculo.
   const time = useTime();
