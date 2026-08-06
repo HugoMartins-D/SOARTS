@@ -4,6 +4,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeft, ArrowRight, Camera, Menu, Play, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
 import { GooeyRevealHero } from "@/app/components/hero/gooey-reveal-hero";
+import GradientWaves from "@/app/components/hero/GradientWaves.jsx";
 import { FranciscoCard } from "@/app/components/sobre/francisco-card";
 import { fetchPublicProjects, publicMediaUrl, type ProjectRow } from "@/utils/projects";
 import imgPromenac from "@/imports/LpSoarts-1/4f9ded526e079a81f945748a1d5b20399db88462.png";
@@ -782,6 +783,8 @@ function ContatoSection() {
 }
 
 export default function App() {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className="bg-black min-h-screen font-['Inter',sans-serif] text-white">
       <Navbar />
@@ -815,6 +818,40 @@ export default function App() {
          */
         fit="xMaxYMax meet"
       >
+        {/*
+          Fundo animado, atrás do retrato (z-index negativo: o <svg> do
+          GooeyRevealHero não tem z-index, então qualquer valor negativo
+          aqui já garante que fica por trás dele, não importa a ordem no
+          DOM). Cores da marca: laranja #FF5200 subindo do preto, crista
+          em âmbar claro. Desligado com "reduzir movimento" ligado — é
+          decorativo, não vale gastar GPU à toa nesse caso.
+        */}
+        {!prefersReducedMotion && (
+          <div className="absolute inset-0 -z-10">
+            <GradientWaves
+              horizonColor="#000000"
+              waveColor="#FF5200"
+              crestColor="#FFD9C2"
+              speed={0.25}
+              amplitude={1.4}
+              waveScale={0.6}
+              waveRatio={0.9}
+              swell={35}
+              turbulence={20}
+              tilt={1.11}
+              zoom={1.0}
+              height={5.5}
+              fogDepth={15}
+              detail="low"
+              brightness={0.8}
+              opacity={0.55}
+              mouseInteraction={true}
+              parallaxStrength={0.4}
+              grain={true}
+              grainIntensity={0.04}
+            />
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/10 to-transparent pointer-events-none" />
 
