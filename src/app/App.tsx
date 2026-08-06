@@ -23,10 +23,10 @@ const NAV_LINKS = [
 ];
 
 const BRANDS = [
-  { src: imgPixel, alt: "JB Plus Size" },
-  { src: imgPromenac, alt: "Promenac/Camvel" },
-  { src: imgGlobo, alt: "Grupo Globo" },
-  { src: imgHelp, alt: "HelpSmart" },
+  { src: imgPixel, alt: "JB Plus Size", instagram: "https://www.instagram.com/fb_plussize/" },
+  { src: imgPromenac, alt: "Promenac/Camvel", instagram: "https://www.instagram.com/promenaccamvel/" },
+  { src: imgGlobo, alt: "Grupo Globo", instagram: "https://www.instagram.com/grupo.globo/" },
+  { src: imgHelp, alt: "HelpSmart", instagram: "https://www.instagram.com/help.smartcell/" },
 ];
 
 /**
@@ -1064,12 +1064,20 @@ export default function App() {
         >
           <div className="marquee-track flex items-center gap-16 md:gap-24 w-max">
             {[...BRANDS, ...BRANDS].map((brand, i) => (
-              <img
+              <a
                 key={i}
-                src={brand.src}
-                alt={brand.alt}
-                className="h-9 md:h-11 w-auto object-contain shrink-0 opacity-80 hover:opacity-100 transition-opacity"
-              />
+                href={brand.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${brand.alt} no Instagram`}
+                className="shrink-0"
+              >
+                <img
+                  src={brand.src}
+                  alt={brand.alt}
+                  className="h-9 md:h-11 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                />
+              </a>
             ))}
           </div>
         </div>
