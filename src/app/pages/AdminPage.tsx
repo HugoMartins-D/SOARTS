@@ -3,6 +3,7 @@ import type { Session } from "@supabase/supabase-js";
 import { Trash2 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { publicMediaUrl, type ProjectRow } from "@/utils/projects";
+import type { LeadRow } from "@/utils/leads";
 
 const ORANGE = "#FF5200";
 
@@ -95,9 +96,29 @@ function Dashboard() {
     setLoadingList(false);
   }, []);
 
+  const [leads, setLeads] = useState<LeadRow[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(true);
+
+  const loadLeads = useCallback(async () => {
+    setLoadingLeads(true);
+    const { data } = await supabase
+      .from("leads")
+      .select("*")
+      .order("created_at", { ascending: false });
+    setLeads(data ?? []);
+    setLoadingLeads(false);
+  }, []);
+
   useEffect(() => {
     loadProjects();
-  }, [loadProjects]);
+    loadLeads();
+  }, [loadProjects, loadLeads]);
+
+  async function handleDeleteLead(lead: LeadRow) {
+    if (!confirm(`Apagar o lead de "${lead.nome || lead.whatsapp}"?`)) return;
+    await supabase.from("leads").delete().eq("id", lead.id);
+    await loadLeads();
+  }
 
   function set<K extends keyof typeof emptyForm>(field: K, value: (typeof emptyForm)[K]) {
     setForm((f) => ({ ...f, [field]: value }));
@@ -320,6 +341,56 @@ function Dashboard() {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {/* Leads recebidos pelo formulário de contato */}
+        <div className="lg:col-span-2">
+          <h2 className="text-lg font-bold mb-4">
+            Leads recebidos {leads.length > 0 && <span className="text-white/40 font-normal">({leads.length})</span>}
+          </h2>
+          {loadingLeads ? (
+            <p className="text-white/40">Carregando…</p>
+          ) : leads.length === 0 ? (
+            <p className="text-white/40">Nenhum lead ainda. Aparecem aqui assim que alguém enviar o formulário de contato.</p>
+          ) : (
+            <div className="space-y-3">
+              {leads.map((lead) => (
+                <div key={lead.id} className="liquid-glass rounded-2xl p-5 flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+                      <p className="font-semibold">{lead.nome || "(sem nome)"}</p>
+                      {lead.empresa && <p className="text-white/50 text-sm">{lead.empresa}</p>}
+                      <p className="text-white/30 text-xs">
+                        {new Date(lead.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-white/70 mb-2">
+                      <a
+                        href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#FF5200] transition-colors"
+                        style={{ color: ORANGE }}
+                      >
+                        {lead.whatsapp}
+                      </a>
+                      {lead.instagram && <span>{lead.instagram}</span>}
+                      {lead.tipo_projeto && <span>{lead.tipo_projeto}</span>}
+                      {lead.investimento && <span>{lead.investimento}</span>}
+                    </div>
+                    {lead.mensagem && <p className="text-white/60 text-sm leading-relaxed">{lead.mensagem}</p>}
+                  </div>
+                  <button
+                    onClick={() => handleDeleteLead(lead)}
+                    aria-label={`Apagar lead de ${lead.nome || lead.whatsapp}`}
+                    className="shrink-0 w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>

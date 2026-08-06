@@ -6,6 +6,7 @@ import { cn } from "@/app/components/ui/utils";
 import { GooeyRevealHero } from "@/app/components/hero/gooey-reveal-hero";
 import { FranciscoCard } from "@/app/components/sobre/francisco-card";
 import { fetchPublicProjects, publicMediaUrl, type ProjectRow } from "@/utils/projects";
+import { submitLead } from "@/utils/leads";
 import imgPromenac from "@/imports/LpSoarts-1/4f9ded526e079a81f945748a1d5b20399db88462.png";
 import imgGlobo from "@/imports/LpSoarts-1/ebd2fbc1227c2348e8af1bd608466186a92edd14.png";
 import imgHelp from "@/imports/LpSoarts-1/logo-help.webp";
@@ -652,7 +653,10 @@ function ContatoSection() {
       `Investimento: ${form.investimento}`,
       form.mensagem ? `Mensagem: ${form.mensagem}` : "",
     ].filter(Boolean).join("%0A");
-    window.open(`https://wa.me/55?text=${texto}`, "_blank");
+    // WhatsApp do Chicão — número real, número do formulário nunca deve
+    // ficar vazio aqui (ver histórico: sem ele o wa.me abre sem destinatário).
+    window.open(`https://wa.me/5547997888880?text=${texto}`, "_blank");
+    submitLead(form);
     setSent(true);
   }
 
