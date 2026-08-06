@@ -801,11 +801,14 @@ function Footer() {
               {Array.from({ length: FOOTER_MARQUEE_REPEATS }).map((_, i) => (
                 <span key={i} className="flex items-center gap-10 shrink-0">
                   <span
-                    className="text-4xl md:text-6xl font-extrabold uppercase tracking-tight whitespace-nowrap"
+                    className={cn(
+                      "text-4xl md:text-6xl uppercase tracking-tight whitespace-nowrap",
+                      i % 2 === 0 ? "font-extrabold" : "font-light",
+                    )}
                     style={
                       i % 2 === 0
                         ? { color: "rgba(255,255,255,0.9)" }
-                        : { color: "transparent", WebkitTextStroke: "1.5px rgba(255,255,255,0.8)" }
+                        : { color: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.8)" }
                     }
                   >
                     Vamos criar juntos
