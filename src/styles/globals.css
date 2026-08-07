@@ -200,26 +200,26 @@
 .francisco-card__slot {
   /*
    * Medido a partir de foto-francisco-card.webp (768×1362, script de
-   * histograma de brilho no scratchpad da sessão que trocou a foto):
-   * o cabelo começa a 14,8% da altura, os ombros só ficam largura-total
-   * a ~74,7%. Janela visível com `cover` + aspect-ratio 1,4 mostra ~40%
-   * da altura da imagem; `background-position: 50% 18%` centraliza essa
-   * janela em "testa até ombro/início do peito", sem cortar o queixo.
-   * `aspect-ratio` (em vez de altura fixa) mantém esse enquadramento
-   * estável em qualquer largura do painel — como é proporção e não
-   * pixel, o recorte relativo não muda quando o card fica mais largo, só
-   * a escala. Se troca a foto, remeça essa medição antes de reusar os
+   * histograma de brilho no scratchpad da sessão que trocou a foto): o
+   * cabelo começa a 14,8% da altura. Proporção 0,667 (retrato, não mais
+   * paisagem) com `cover` mostra ~85% da altura da imagem — de pouco
+   * acima do cabelo até quase o fim do braço cruzado — pra aparecer o
+   * corpo (peito, braços tatuados, relógio), não só o rosto.
+   * `background-position: 50% 71%` empurra a janela quase pro fim da
+   * foto (só um pouco cortado embaixo). `aspect-ratio` (em vez de altura
+   * fixa) mantém esse enquadramento estável em qualquer largura do
+   * painel. Se troca a foto, remeça essa medição antes de reusar os
    * números abaixo.
    */
   position: relative;
-  aspect-ratio: 1.4;
+  aspect-ratio: 0.667;
   border-radius: 22px;
   border: 1px solid var(--fc-hairline);
   overflow: hidden;
   background-color: var(--fc-panel-2);
   background-repeat: no-repeat, no-repeat;
   background-size: cover, 120% 100%;
-  background-position: 50% 18%, 30% -10%;
+  background-position: 50% 71%, 30% -10%;
 }
 
 .francisco-card__avatar {
