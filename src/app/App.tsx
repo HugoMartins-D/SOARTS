@@ -908,9 +908,22 @@ function Footer() {
       </div>
 
       <div className="px-6 md:px-16 py-6 border-t border-white/10 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
-        <p className="text-white/40 text-xs tracking-widest text-center sm:text-left">
-          DIREITOS RESERVADOS SOARTS - 2026
-        </p>
+        <div className="flex flex-col items-center sm:items-start gap-1.5">
+          <p className="text-white/40 text-xs tracking-widest text-center sm:text-left">
+            DIREITOS RESERVADOS SOARTS - 2026
+          </p>
+          <p className="text-white/25 text-[11px] tracking-widest text-center sm:text-left">
+            SITE POR{" "}
+            <a
+              href="https://www.codeleess.com.br/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/40 hover:text-white/70 transition-colors underline underline-offset-2"
+            >
+              CODELESS
+            </a>
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
