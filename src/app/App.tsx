@@ -1114,8 +1114,18 @@ export default function App() {
             WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
           }}
         >
-          <div className="marquee-track flex items-center gap-16 md:gap-24 w-max">
-            {[...BRANDS, ...BRANDS].map((brand, i) => (
+          {/*
+            4 cópias (não 2): em monitores ultrawide, 2 cópias do conjunto de
+            logos cabem inteiras na tela, e sobra um vazio antes do loop
+            fechar — a "hora que termina a logo" que dava pra ver. Com 4
+            cópias sempre há conteúdo de sobra pra preencher até telas bem
+            largas antes do ponto de repetição.
+          */}
+          <div
+            className="marquee-track flex items-center gap-16 md:gap-24 w-max"
+            style={{ "--marquee-end": "-25%" } as React.CSSProperties}
+          >
+            {[...BRANDS, ...BRANDS, ...BRANDS, ...BRANDS].map((brand, i) => (
               <a
                 key={i}
                 href={brand.instagram}

@@ -114,12 +114,19 @@
   to   { transform: rotate(360deg); }
 }
 
-/* Carrossel automático de logos (seção "Marcas"). A trilha contém o array
-   duplicado; -50% é exatamente a largura de UM conjunto, então o loop fecha
-   sem salto. */
+/*
+ * Carrossel automático (logos da seção "Marcas", texto do rodapé). A
+ * trilha contém o conteúdo repetido N vezes; o loop fecha sem salto
+ * porque anda exatamente 1/N da trilha — na volta, o próximo conjunto
+ * já está no lugar onde o primeiro começou. `--marquee-end` deixa cada
+ * uso configurar esse 1/N sem duplicar a animação: com 2 cópias é -50%
+ * (padrão), com 4 cópias (mais margem pra telas ultrawide, onde 2
+ * cópias cabiam inteiras na tela e sobrava vazio antes de repetir) é
+ * -25%.
+ */
 @keyframes marquee {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(var(--marquee-end, -50%)); }
 }
 
 .marquee-track {
