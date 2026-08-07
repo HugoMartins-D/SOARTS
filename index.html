@@ -10,6 +10,21 @@
   <meta name="description"
     content="Create stunning landing pages effortlessly with this intuitive web application, designed for marketers and businesses to boost conversions and engagement." />
   <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Preconnect abre a conexão (DNS+TLS) com o Google Fonts em paralelo ao
+       parse do HTML, em vez de só começar quando o CSS pedir. O <link
+       rel="stylesheet"> troca o antigo @import (bloqueante: baixa o CSS,
+       parseia, só então descobre as fontes) por descoberta direta no HTML. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;800&display=swap" />
+
+  <!-- A imagem base do Hero é o LCP da página, mas só é descoberta depois do
+       JS montar o SVG — preload adianta o fetch pro paralelo com o download
+       do bundle. -->
+  <link rel="preload" as="image" href="/images/hero/chicao-base.webp" fetchpriority="high" />
+
   <style>
     html,
     body {

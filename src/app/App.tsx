@@ -144,10 +144,17 @@ function ProjectSlide({ project }: { project: Project }) {
           poster={project.image}
           controls
           playsInline
+          preload="metadata"
           className="absolute inset-0 w-full h-full object-contain bg-black"
         />
       ) : project.image ? (
-        <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />
+        <img
+          src={project.image}
+          alt={project.title}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
           <CategoryIcon category={project.category} className="w-14 h-14 text-white/10" />
@@ -209,7 +216,12 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                 className="absolute inset-0 w-full h-full object-contain bg-black"
               />
             ) : project.image ? (
-              <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-contain bg-black" />
+              <img
+                src={project.image}
+                alt={project.title}
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-contain bg-black"
+              />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <CategoryIcon category={project.category} className="w-14 h-14 text-white/10" />
@@ -370,6 +382,7 @@ function ProjetosSection() {
                     muted
                     loop
                     playsInline
+                    preload="none"
                     className="absolute inset-0 w-full h-full object-contain bg-black"
                     onMouseEnter={(e) => e.currentTarget.play()}
                     onMouseLeave={(e) => {
@@ -378,7 +391,13 @@ function ProjetosSection() {
                     }}
                   />
                 ) : project.image ? (
-                  <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <CategoryIcon category={project.category} className="w-8 h-8 text-white/10" />
@@ -889,7 +908,7 @@ function Footer() {
       </div>
 
       <div className="px-6 md:px-16 py-6 border-t border-white/10 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
-        <p className="font-['Montserrat',sans-serif] text-white/40 text-xs tracking-widest text-center sm:text-left">
+        <p className="text-white/40 text-xs tracking-widest text-center sm:text-left">
           DIREITOS RESERVADOS SOARTS - 2026
         </p>
         <button
@@ -1137,6 +1156,8 @@ export default function App() {
                 <img
                   src={brand.src}
                   alt={brand.alt}
+                  loading="lazy"
+                  decoding="async"
                   className="h-9 md:h-11 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
                 />
               </a>

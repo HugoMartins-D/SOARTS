@@ -96,6 +96,7 @@ export function GooeyRevealHero({
   const prefersReducedMotion = useReducedMotion();
   const [isDesktop, setIsDesktop] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isInView, setIsInView] = useState(true);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px) and (pointer: fine)");
@@ -105,10 +106,25 @@ export function GooeyRevealHero({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // As 12 bolhas ambientes rodam num loop de `requestAnimationFrame` pra
+  // sempre — sem isso, ele continuaria gastando CPU/GPU mesmo com o Hero
+  // rolado pra fora da tela, competindo com o resto da página (o scroll e
+  // as animações do GSAP nas outras seções). O observer só liga o loop
+  // quando o Hero está (ao menos parcialmente) visível.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(([entry]) => setIsInView(entry.isIntersecting), {
+      threshold: 0,
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   // A revelação em si só depende de haver cursor. O movimento ambiente é que
-  // cede ao prefers-reduced-motion.
+  // cede ao prefers-reduced-motion e pausa fora da viewport.
   const effectEnabled = isDesktop;
-  const ambientMotion = !prefersReducedMotion;
+  const ambientMotion = !prefersReducedMotion && isInView;
   const cursorActive = isHovering || previewCursor;
   const parallax = ambientMotion ? parallaxStrength : 0;
 
