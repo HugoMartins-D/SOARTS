@@ -672,7 +672,7 @@ function ContatoSection() {
             Pronto para posicionar sua marca?
           </h2>
           <p className="text-white/60 text-lg leading-relaxed">
-            Me conte sobre seu projeto e vamos construir algo que gere valor, conexão e resultado.
+            Me conte sobre o seu projeto e vamos transformar sua ideia em valor, conexão e resultados.
           </p>
         </div>
 
