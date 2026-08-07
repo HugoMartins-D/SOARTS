@@ -1,4 +1,4 @@
-import fotoFrancisco from "@/imports/LpSoarts-1/foto-sobre-mim.webp";
+import fotoFrancisco from "@/imports/LpSoarts-1/foto-francisco-card.webp";
 
 /**
  * Cartão de perfil da seção "Sobre Mim" — substitui o crachá 3D.
