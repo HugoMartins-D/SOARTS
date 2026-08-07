@@ -12,7 +12,7 @@ import fotoFrancisco from "@/imports/LpSoarts-1/foto-sobre-mim.webp";
  */
 export function FranciscoCard() {
   return (
-    <div className="francisco-card w-full max-w-[420px] mx-auto lg:mx-0 lg:w-[480px] xl:w-[560px] shrink-0">
+    <div className="francisco-card w-full max-w-[480px] mx-auto lg:mx-0 lg:w-[560px] xl:w-[720px] shrink-0">
       <div className="px-1.5 pb-[34px]">
         <h1 className="francisco-card__name">
           Francisco

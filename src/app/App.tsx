@@ -1016,35 +1016,37 @@ export default function App() {
 
       {/* SOBRE MIM */}
       <section id="sobre" className="w-full px-6 md:px-16 py-24 md:py-32">
-        <p className="text-sm tracking-[0.3em] font-semibold mb-12" style={{ color: ORANGE }}>
-          SOBRE MIM
-        </p>
-        <div className="flex flex-col lg:flex-row gap-12 items-start">
-          {/* Texto */}
-          <div className="flex-1 text-white text-xl md:text-2xl leading-relaxed space-y-6">
-            <p>
-              Sou videomaker e criador especializado em posicionar marcas através de vídeo.
-              Mais do que produzir, construo narrativas que geram conexão e aumentam percepção de valor.
-            </p>
-            <p>
-              Da ideia à entrega final, unindo estética e estratégia para transformar cada projeto numa marca que é vista, lembrada e escolhida.
-            </p>
+        <div className="max-w-6xl mx-auto">
+          <p className="text-sm tracking-[0.3em] font-semibold mb-12" style={{ color: ORANGE }}>
+            SOBRE MIM
+          </p>
+          <div className="flex flex-col lg:flex-row gap-12 lg:justify-between items-start">
+            {/* Texto */}
+            <div className="max-w-xl text-white text-xl md:text-2xl leading-relaxed space-y-6">
+              <p>
+                Sou videomaker e criador especializado em posicionar marcas através de vídeo.
+                Mais do que produzir, construo narrativas que geram conexão e aumentam percepção de valor.
+              </p>
+              <p>
+                Da ideia à entrega final, unindo estética e estratégia para transformar cada projeto numa marca que é vista, lembrada e escolhida.
+              </p>
+            </div>
+
+            {/* Cartão de perfil — ver francisco-card.tsx. Substituiu o crachá
+                3D (three.js+r3f+drei foram removidos do package.json). */}
+            <FranciscoCard />
           </div>
 
-          {/* Cartão de perfil — ver francisco-card.tsx. Substituiu o crachá
-              3D (three.js+r3f+drei foram removidos do package.json). */}
-          <FranciscoCard />
-        </div>
-
-        {/* CTA */}
-        <div className="mt-20 flex justify-center">
-          <a
-            href="#contato"
-            className="text-white text-2xl md:text-3xl font-normal px-16 py-4 rounded-full shadow-lg transition-colors text-center"
-            style={{ backgroundColor: ORANGE }}
-          >
-            Quero posicionar minha marca
-          </a>
+          {/* CTA */}
+          <div className="mt-20 flex justify-center">
+            <a
+              href="#contato"
+              className="text-white text-2xl md:text-3xl font-normal px-16 py-4 rounded-full shadow-lg transition-colors text-center"
+              style={{ backgroundColor: ORANGE }}
+            >
+              Quero posicionar minha marca
+            </a>
+          </div>
         </div>
       </section>
 

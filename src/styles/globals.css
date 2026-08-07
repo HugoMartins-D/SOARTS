@@ -201,15 +201,15 @@
   /*
    * Medido a partir da foto real (ver notas do card em
    * francisco-card.tsx): o cabelo começa a 18.8% da altura, e a camisa só
-   * vira largura-total a partir de ~70%. A altura 400px (contra uma
-   * largura de painel de ~312-560px, dependendo do breakpoint) dá janela
-   * suficiente para mostrar da testa até dentro da zona onde a camisa já
-   * preenche a largura toda — assim o único "corte" que sobra é a borda
-   * do próprio painel, não um corte no meio do corpo. Se troca a foto,
+   * vira largura-total a partir de ~70%. `aspect-ratio` (em vez de altura
+   * fixa) mantém esse enquadramento estável em qualquer largura do painel
+   * — como é proporção e não pixel, o recorte relativo não muda quando o
+   * card fica mais largo, só a escala. 1.4 é a proporção com que a foto
+   * foi calibrada (560×400 no breakpoint xl original). Se troca a foto,
    * remeça essa medição antes de reusar os números abaixo.
    */
   position: relative;
-  height: 400px;
+  aspect-ratio: 1.4;
   border-radius: 22px;
   border: 1px solid var(--fc-hairline);
   overflow: hidden;
