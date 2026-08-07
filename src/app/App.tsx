@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, useInView, useReducedMotion } from "motion/react";
+import { useGSAP } from "@gsap/react";
+import { gsap, prefersReducedMotion } from "@/app/lib/gsap";
+import { Reveal } from "@/app/components/anim/Reveal";
+import { Magnetic } from "@/app/components/anim/Magnetic";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeft, ArrowRight, ArrowUp, Camera, Instagram, Menu, Play, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
@@ -266,12 +270,14 @@ function ProjetosSection() {
   return (
     <section id="projetos" className="w-full px-6 md:px-16 py-24 md:py-32">
       <div className="max-w-6xl mx-auto">
-        <p className="text-sm tracking-[0.3em] font-semibold mb-4" style={{ color: ORANGE }}>
-          PROJETOS
-        </p>
-        <h2 className="text-4xl md:text-6xl font-extrabold leading-tight max-w-3xl mb-10">
-          O mundo através da minha lente
-        </h2>
+        <Reveal>
+          <p className="text-sm tracking-[0.3em] font-semibold mb-4" style={{ color: ORANGE }}>
+            PROJETOS
+          </p>
+          <h2 className="text-4xl md:text-6xl font-extrabold leading-tight max-w-3xl mb-10">
+            O mundo através da minha lente
+          </h2>
+        </Reveal>
 
         {/* Abas */}
         <div className="flex gap-3 mb-12">
@@ -340,9 +346,9 @@ function ProjetosSection() {
             projeto; com um só, ela apenas repetia o mesmo card do carrossel. */}
         {filtered.length > 1 && (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-20">
-            {filtered.map((project) => (
+            {filtered.map((project, i) => (
+              <Reveal key={project.id} delay={(i % 3) * 0.1} y={24}>
               <div
-                key={project.id}
                 role="button"
                 tabIndex={0}
                 onClick={() => setSelectedProject(project)}
@@ -385,6 +391,7 @@ function ProjetosSection() {
                   <p className="text-sm font-semibold leading-snug">{project.title}</p>
                 </div>
               </div>
+              </Reveal>
             ))}
           </div>
         )}
@@ -664,7 +671,7 @@ function ContatoSection() {
     <section id="contato" className="w-full px-6 md:px-16 py-24 md:py-32">
       <div className="max-w-4xl mx-auto flex flex-col lg:flex-row gap-16 items-start">
         {/* Texto */}
-        <div className="lg:w-80 shrink-0">
+        <Reveal className="lg:w-80 shrink-0">
           <p className="text-sm tracking-[0.3em] font-semibold mb-4" style={{ color: ORANGE }}>
             CONTATO
           </p>
@@ -674,10 +681,10 @@ function ContatoSection() {
           <p className="text-white/60 text-lg leading-relaxed">
             Me conte sobre o seu projeto e vamos transformar sua ideia em valor, conexão e resultados.
           </p>
-        </div>
+        </Reveal>
 
         {/* Formulário */}
-        <div className="flex-1 w-full liquid-glass rounded-3xl p-6 md:p-8">
+        <Reveal delay={0.15} className="flex-1 w-full liquid-glass rounded-3xl p-6 md:p-8">
           {sent ? (
             <div className="liquid-glass-accent rounded-2xl p-10 text-center">
               <p className="text-2xl font-bold mb-2">Mensagem enviada!</p>
@@ -765,18 +772,20 @@ function ContatoSection() {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full text-white text-lg font-bold py-4 rounded-full transition-colors"
-                style={{ backgroundColor: ORANGE }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#cc4200")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = ORANGE)}
-              >
-                Enviar mensagem
-              </button>
+              <Magnetic className="block">
+                <button
+                  type="submit"
+                  className="w-full text-white text-lg font-bold py-4 rounded-full transition-colors"
+                  style={{ backgroundColor: ORANGE }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#cc4200")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = ORANGE)}
+                >
+                  Enviar mensagem
+                </button>
+              </Magnetic>
             </form>
           )}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -866,14 +875,16 @@ function Footer() {
             <Instagram className="w-4 h-4" />
             @chicaomaker
           </a>
-          <a
-            href="#contato"
-            className="flex items-center gap-2 text-white text-sm font-semibold w-fit rounded-full px-5 py-2.5 transition-colors"
-            style={{ backgroundColor: ORANGE }}
-          >
-            Enviar mensagem
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <Magnetic className="block w-fit">
+            <a
+              href="#contato"
+              className="flex items-center gap-2 text-white text-sm font-semibold w-fit rounded-full px-5 py-2.5 transition-colors"
+              style={{ backgroundColor: ORANGE }}
+            >
+              Enviar mensagem
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </Magnetic>
         </div>
       </div>
 
@@ -897,11 +908,36 @@ function Footer() {
 }
 
 export default function App() {
+  const heroRef = useRef<HTMLDivElement>(null);
+
+  // Timeline de entrada — dispara uma vez, na montagem (a Hero já está
+  // visível assim que a página carrega, não precisa de ScrollTrigger).
+  // `useGSAP` roda em `useLayoutEffect`, então o estado inicial (opacity:0)
+  // é aplicado antes do primeiro paint — sem flash de conteúdo visível.
+  useGSAP(
+    () => {
+      if (prefersReducedMotion()) return;
+
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .from(".js-hero-badge", { opacity: 0, y: 16, duration: 0.6 })
+        .from(".js-hero-title-line", { opacity: 0, y: 60, duration: 0.9, stagger: 0.12 }, "-=0.35")
+        .from(".js-hero-subtitle", { opacity: 0, y: 20, duration: 0.7 }, "-=0.5")
+        .from(".js-hero-desc", { opacity: 0, y: 20, duration: 0.7 }, "-=0.5")
+        .from(".js-hero-cta > *", { opacity: 0, y: 20, duration: 0.6, stagger: 0.1 }, "-=0.4")
+        .from(".js-hero-stats > *", { opacity: 0, y: 20, duration: 0.6, stagger: 0.1 }, "-=0.5")
+        .from(".js-hero-side", { opacity: 0, duration: 0.8 }, "-=0.6")
+        .from(".js-hero-scroll", { opacity: 0, y: 10, duration: 0.6 }, "-=0.4");
+    },
+    { scope: heroRef },
+  );
+
   return (
     <div className="bg-black min-h-screen font-['Inter',sans-serif] text-white">
       <Navbar />
 
       {/* HERO */}
+      <div ref={heroRef}>
       <GooeyRevealHero
         id="inicio"
         className="relative w-full max-w-[1800px] mx-auto min-h-screen flex flex-col justify-start lg:justify-center overflow-hidden"
@@ -936,7 +972,7 @@ export default function App() {
         <div className="relative z-10 w-full px-6 md:px-16 pt-28 sm:pt-32 pb-10 lg:py-0">
           <div className="flex flex-col lg:flex-row lg:items-center gap-10 xl:gap-20">
             <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 shrink-0 flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <div className="js-hero-badge flex items-center gap-3 mb-4 sm:mb-6">
                 <span className="w-8 h-px shrink-0" style={{ backgroundColor: ORANGE }} />
                 <span className="text-xs md:text-sm tracking-[0.3em] font-semibold text-white/80">
                   VÍDEOS QUE POSICIONAM MARCAS
@@ -944,44 +980,48 @@ export default function App() {
               </div>
 
               <h1 className="font-extrabold leading-[0.95] tracking-tight text-5xl sm:text-7xl lg:text-8xl mb-3 sm:mb-5">
-                <span className="block">CHICÃO</span>
-                <span className="block" style={{ color: ORANGE }}>
+                <span className="js-hero-title-line block">CHICÃO</span>
+                <span className="js-hero-title-line block" style={{ color: ORANGE }}>
                   MAKER
                 </span>
               </h1>
 
-              <p className="text-xl sm:text-2xl md:text-3xl tracking-wide uppercase mb-4 sm:mb-6">
+              <p className="js-hero-subtitle text-xl sm:text-2xl md:text-3xl tracking-wide uppercase mb-4 sm:mb-6">
                 <span className="font-light text-white/80">Videomaker e </span>
                 <span className="font-bold">criador</span>
               </p>
 
-              <p className="text-white/60 text-base md:text-lg leading-relaxed mb-6 sm:mb-10 max-w-md">
+              <p className="js-hero-desc text-white/60 text-base md:text-lg leading-relaxed mb-6 sm:mb-10 max-w-md">
                 Transformo ideias em vídeos que conectam, engajam e posicionam marcas no digital.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-                <a
-                  href="#contato"
-                  className="inline-flex items-center gap-2 text-white text-lg font-extrabold px-10 py-4 rounded-full shadow-lg transition-colors"
-                  style={{ backgroundColor: ORANGE }}
-                >
-                  Vamos criar
-                  <ArrowRight className="w-5 h-5" />
-                </a>
-                <a
-                  href="#projetos"
-                  className="liquid-glass inline-flex items-center gap-3 text-white text-base font-semibold pl-2 pr-8 py-2 rounded-full transition-colors hover:border-white/40"
-                >
-                  <span className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center shrink-0">
-                    <Play className="w-4 h-4 ml-0.5" />
-                  </span>
-                  Ver projetos
-                </a>
+              <div className="js-hero-cta flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                <Magnetic>
+                  <a
+                    href="#contato"
+                    className="inline-flex items-center gap-2 text-white text-lg font-extrabold px-10 py-4 rounded-full shadow-lg transition-colors"
+                    style={{ backgroundColor: ORANGE }}
+                  >
+                    Vamos criar
+                    <ArrowRight className="w-5 h-5" />
+                  </a>
+                </Magnetic>
+                <Magnetic>
+                  <a
+                    href="#projetos"
+                    className="liquid-glass inline-flex items-center gap-3 text-white text-base font-semibold pl-2 pr-8 py-2 rounded-full transition-colors hover:border-white/40"
+                  >
+                    <span className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center shrink-0">
+                      <Play className="w-4 h-4 ml-0.5" />
+                    </span>
+                    Ver projetos
+                  </a>
+                </Magnetic>
               </div>
             </div>
 
             {/* Só aparece em telas grandes (lg+), onde sobra vazio entre o texto e o retrato. */}
-            <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
+            <div className="js-hero-stats hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
               {HERO_STATS.map((stat) => (
                 <CountUpStat key={stat.label} {...stat} />
               ))}
@@ -990,7 +1030,7 @@ export default function App() {
         </div>
 
         {/* Selo vertical, lado direito */}
-        <div className="hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2 z-10">
+        <div className="js-hero-side hidden lg:flex absolute right-10 top-1/2 -translate-y-1/2 z-10">
           <span
             className="text-xs tracking-[0.35em] uppercase text-white/50 whitespace-nowrap"
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
@@ -1001,7 +1041,7 @@ export default function App() {
         </div>
 
         {/* Indicador de scroll */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3">
+        <div className="js-hero-scroll absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3">
           <span className="w-5 h-8 rounded-full border border-white/25 flex items-start justify-center p-1.5">
             <span className="w-1 h-1.5 rounded-full bg-white/60 animate-bounce" />
           </span>
@@ -1010,6 +1050,7 @@ export default function App() {
           </span>
         </div>
       </GooeyRevealHero>
+      </div>
 
       {/* PROJETOS */}
       <ProjetosSection />
@@ -1017,12 +1058,14 @@ export default function App() {
       {/* SOBRE MIM */}
       <section id="sobre" className="w-full px-6 md:px-16 py-24 md:py-32">
         <div className="max-w-6xl mx-auto">
-          <p className="text-sm tracking-[0.3em] font-semibold mb-12" style={{ color: ORANGE }}>
-            SOBRE MIM
-          </p>
+          <Reveal>
+            <p className="text-sm tracking-[0.3em] font-semibold mb-12" style={{ color: ORANGE }}>
+              SOBRE MIM
+            </p>
+          </Reveal>
           <div className="flex flex-col lg:flex-row gap-12 lg:justify-between items-start">
             {/* Texto */}
-            <div className="max-w-xl text-white text-xl md:text-2xl leading-relaxed space-y-6">
+            <Reveal delay={0.1} className="max-w-xl text-white text-xl md:text-2xl leading-relaxed space-y-6">
               <p>
                 Sou videomaker e criador especializado em posicionar marcas através de vídeo.
                 Mais do que produzir, construo narrativas que geram conexão e aumentam percepção de valor.
@@ -1030,33 +1073,39 @@ export default function App() {
               <p>
                 Da ideia à entrega final, unindo estética e estratégia para transformar cada projeto numa marca que é vista, lembrada e escolhida.
               </p>
-            </div>
+            </Reveal>
 
             {/* Cartão de perfil — ver francisco-card.tsx. Substituiu o crachá
                 3D (three.js+r3f+drei foram removidos do package.json). */}
-            <FranciscoCard />
+            <Reveal delay={0.2}>
+              <FranciscoCard />
+            </Reveal>
           </div>
 
           {/* CTA */}
-          <div className="mt-20 flex justify-center">
-            <a
-              href="#contato"
-              className="text-white text-2xl md:text-3xl font-normal px-16 py-4 rounded-full shadow-lg transition-colors text-center"
-              style={{ backgroundColor: ORANGE }}
-            >
-              Quero posicionar minha marca
-            </a>
-          </div>
+          <Reveal className="mt-20 flex justify-center">
+            <Magnetic>
+              <a
+                href="#contato"
+                className="text-white text-2xl md:text-3xl font-normal px-16 py-4 rounded-full shadow-lg transition-colors text-center inline-block"
+                style={{ backgroundColor: ORANGE }}
+              >
+                Quero posicionar minha marca
+              </a>
+            </Magnetic>
+          </Reveal>
         </div>
       </section>
 
       {/* MARCAS */}
       <section className="w-full py-24 overflow-hidden">
-        <h2 className="text-4xl md:text-6xl font-extrabold text-center leading-tight mb-16 md:mb-20 px-6 md:px-16">
-          Marcas que já confiaram
-          <br />
-          no meu trabalho
-        </h2>
+        <Reveal>
+          <h2 className="text-4xl md:text-6xl font-extrabold text-center leading-tight mb-16 md:mb-20 px-6 md:px-16">
+            Marcas que já confiaram
+            <br />
+            no meu trabalho
+          </h2>
+        </Reveal>
 
         <div
           className="relative w-full overflow-hidden"
