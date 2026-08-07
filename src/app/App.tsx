@@ -339,54 +339,54 @@ function ProjetosSection() {
         {/* Grade de mídia — só faz sentido pra folhear quando há mais de um
             projeto; com um só, ela apenas repetia o mesmo card do carrossel. */}
         {filtered.length > 1 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-20">
-          {filtered.map((project) => (
-            <div
-              key={project.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelectedProject(project)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setSelectedProject(project);
-                }
-              }}
-              className={cn(
-                "group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
-                project.gradient,
-              )}
-            >
-              {project.video ? (
-                <video
-                  src={project.video}
-                  poster={project.image}
-                  muted
-                  loop
-                  playsInline
-                  className="absolute inset-0 w-full h-full object-contain bg-black"
-                  onMouseEnter={(e) => e.currentTarget.play()}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.pause();
-                    e.currentTarget.currentTime = 0;
-                  }}
-                />
-              ) : project.image ? (
-                <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <CategoryIcon category={project.category} className="w-8 h-8 text-white/10" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-20">
+            {filtered.map((project) => (
+              <div
+                key={project.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => setSelectedProject(project)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedProject(project);
+                  }
+                }}
+                className={cn(
+                  "group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+                  project.gradient,
+                )}
+              >
+                {project.video ? (
+                  <video
+                    src={project.video}
+                    poster={project.image}
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-contain bg-black"
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.pause();
+                      e.currentTarget.currentTime = 0;
+                    }}
+                  />
+                ) : project.image ? (
+                  <img src={project.image} alt={project.title} className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <CategoryIcon category={project.category} className="w-8 h-8 text-white/10" />
+                  </div>
+                )}
+                <div className="absolute inset-x-3 bottom-3 liquid-glass rounded-xl px-4 py-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                  <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: ORANGE }}>
+                    {project.tag}
+                  </p>
+                  <p className="text-sm font-semibold leading-snug">{project.title}</p>
                 </div>
-              )}
-              <div className="absolute inset-x-3 bottom-3 liquid-glass rounded-xl px-4 py-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: ORANGE }}>
-                  {project.tag}
-                </p>
-                <p className="text-sm font-semibold leading-snug">{project.title}</p>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </div>
 
@@ -672,7 +672,7 @@ function ContatoSection() {
             Pronto para posicionar sua marca?
           </h2>
           <p className="text-white/60 text-lg leading-relaxed">
-            Me conte sobre seu projeto e vamos construir algo que gere valor, conexão e resultado.
+            Me conte sobre o seu projeto e vamos transformar sua ideia em valor, conexão e resultados.
           </p>
         </div>
 
@@ -935,57 +935,57 @@ export default function App() {
 
         <div className="relative z-10 w-full px-6 md:px-16 pt-28 sm:pt-32 pb-10 lg:py-0">
           <div className="flex flex-col lg:flex-row lg:items-center gap-10 xl:gap-20">
-          <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 shrink-0 flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <span className="w-8 h-px shrink-0" style={{ backgroundColor: ORANGE }} />
-              <span className="text-xs md:text-sm tracking-[0.3em] font-semibold text-white/80">
-                VÍDEOS QUE POSICIONAM MARCAS
-              </span>
-            </div>
-
-            <h1 className="font-extrabold leading-[0.95] tracking-tight text-5xl sm:text-7xl lg:text-8xl mb-3 sm:mb-5">
-              <span className="block">CHICÃO</span>
-              <span className="block" style={{ color: ORANGE }}>
-                MAKER
-              </span>
-            </h1>
-
-            <p className="text-xl sm:text-2xl md:text-3xl tracking-wide uppercase mb-4 sm:mb-6">
-              <span className="font-light text-white/80">Videomaker e </span>
-              <span className="font-bold">criador</span>
-            </p>
-
-            <p className="text-white/60 text-base md:text-lg leading-relaxed mb-6 sm:mb-10 max-w-md">
-              Transformo ideias em vídeos que conectam, engajam e posicionam marcas no digital.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-              <a
-                href="#contato"
-                className="inline-flex items-center gap-2 text-white text-lg font-extrabold px-10 py-4 rounded-full shadow-lg transition-colors"
-                style={{ backgroundColor: ORANGE }}
-              >
-                Vamos criar
-                <ArrowRight className="w-5 h-5" />
-              </a>
-              <a
-                href="#projetos"
-                className="liquid-glass inline-flex items-center gap-3 text-white text-base font-semibold pl-2 pr-8 py-2 rounded-full transition-colors hover:border-white/40"
-              >
-                <span className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center shrink-0">
-                  <Play className="w-4 h-4 ml-0.5" />
+            <div className="max-w-xl lg:max-w-2xl mx-auto lg:mx-0 shrink-0 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <span className="w-8 h-px shrink-0" style={{ backgroundColor: ORANGE }} />
+                <span className="text-xs md:text-sm tracking-[0.3em] font-semibold text-white/80">
+                  VÍDEOS QUE POSICIONAM MARCAS
                 </span>
-                Ver projetos
-              </a>
-            </div>
-          </div>
+              </div>
 
-          {/* Só aparece em telas grandes (lg+), onde sobra vazio entre o texto e o retrato. */}
-          <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
-            {HERO_STATS.map((stat) => (
-              <CountUpStat key={stat.label} {...stat} />
-            ))}
-          </div>
+              <h1 className="font-extrabold leading-[0.95] tracking-tight text-5xl sm:text-7xl lg:text-8xl mb-3 sm:mb-5">
+                <span className="block">CHICÃO</span>
+                <span className="block" style={{ color: ORANGE }}>
+                  MAKER
+                </span>
+              </h1>
+
+              <p className="text-xl sm:text-2xl md:text-3xl tracking-wide uppercase mb-4 sm:mb-6">
+                <span className="font-light text-white/80">Videomaker e </span>
+                <span className="font-bold">criador</span>
+              </p>
+
+              <p className="text-white/60 text-base md:text-lg leading-relaxed mb-6 sm:mb-10 max-w-md">
+                Transformo ideias em vídeos que conectam, engajam e posicionam marcas no digital.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                <a
+                  href="#contato"
+                  className="inline-flex items-center gap-2 text-white text-lg font-extrabold px-10 py-4 rounded-full shadow-lg transition-colors"
+                  style={{ backgroundColor: ORANGE }}
+                >
+                  Vamos criar
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+                <a
+                  href="#projetos"
+                  className="liquid-glass inline-flex items-center gap-3 text-white text-base font-semibold pl-2 pr-8 py-2 rounded-full transition-colors hover:border-white/40"
+                >
+                  <span className="w-11 h-11 rounded-full border border-white/30 flex items-center justify-center shrink-0">
+                    <Play className="w-4 h-4 ml-0.5" />
+                  </span>
+                  Ver projetos
+                </a>
+              </div>
+            </div>
+
+            {/* Só aparece em telas grandes (lg+), onde sobra vazio entre o texto e o retrato. */}
+            <div className="hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
+              {HERO_STATS.map((stat) => (
+                <CountUpStat key={stat.label} {...stat} />
+              ))}
+            </div>
           </div>
         </div>
 
