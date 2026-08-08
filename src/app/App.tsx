@@ -135,17 +135,44 @@ function CategoryIcon({ category, className }: { category: Project["category"]; 
   );
 }
 
-function ProjectSlide({ project }: { project: Project }) {
+/**
+ * Card de uma fileira estilo Netflix: proporção 16:9, cresce e revela
+ * título/descrição no hover, e pré-visualiza vídeo mudo passando o mouse —
+ * exatamente o que os cards da antiga grade abaixo do carrossel já faziam.
+ */
+function ProjectRowCard({ project, onSelect }: { project: Project; onSelect: () => void }) {
   return (
-    <div className={cn("relative aspect-[16/10] md:aspect-[16/9] rounded-3xl overflow-hidden bg-gradient-to-br", project.gradient)}>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      className={cn(
+        "group relative aspect-video rounded-2xl overflow-hidden bg-gradient-to-br cursor-pointer",
+        "transition-transform duration-300 ease-out hover:scale-[1.06] hover:z-10",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+        project.gradient,
+      )}
+    >
       {project.video ? (
         <video
           src={project.video}
           poster={project.image}
-          controls
+          muted
+          loop
           playsInline
-          preload="metadata"
-          className="absolute inset-0 w-full h-full object-contain bg-black"
+          preload="none"
+          className="absolute inset-0 w-full h-full object-cover"
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => {
+            e.currentTarget.pause();
+            e.currentTarget.currentTime = 0;
+          }}
         />
       ) : project.image ? (
         <img
@@ -157,16 +184,24 @@ function ProjectSlide({ project }: { project: Project }) {
         />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center">
-          <CategoryIcon category={project.category} className="w-14 h-14 text-white/10" />
+          <CategoryIcon category={project.category} className="w-10 h-10 text-white/10" />
         </div>
       )}
-      <div className="absolute inset-x-4 bottom-4 md:inset-x-6 md:bottom-6 liquid-glass rounded-2xl p-5 md:p-6">
-        <span className="text-xs tracking-[0.2em] font-semibold uppercase" style={{ color: ORANGE }}>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <p className="text-[0.65rem] font-semibold tracking-wide uppercase" style={{ color: ORANGE }}>
           {project.tag}
-        </span>
-        <h3 className="text-xl md:text-2xl font-bold mt-1 mb-1">{project.title}</h3>
-        <p className="text-white/60 text-sm md:text-base leading-snug max-w-md">{project.description}</p>
+        </p>
+        <p className="text-sm font-semibold leading-snug truncate">{project.title}</p>
+        <p className="hidden md:block text-white/60 text-xs leading-snug mt-1 line-clamp-2">
+          {project.description}
+        </p>
       </div>
+      {project.category === "video" && (
+        <div className="absolute top-3 right-3 w-7 h-7 rounded-full liquid-glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Play className="w-3.5 h-3.5" fill="currentColor" strokeWidth={0} />
+        </div>
+      )}
     </div>
   );
 }
@@ -260,12 +295,24 @@ function ProjetosSection() {
   const source = dbProjects && dbProjects.length > 0 ? dbProjects : PROJECTS;
   const filtered = source.filter((p) => p.category === tab);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ align: "center", loop: true });
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  // `dragFree` + `containScroll: trimSnaps` é o que dá o comportamento de
+  // fileira da Netflix: vários cards visíveis, próximo card "espiando" na
+  // borda, sem travar num slide central por vez.
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: "start",
+    loop: false,
+    dragFree: true,
+    containScroll: "trimSnaps",
+  });
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    const onSelect = () => {
+      setCanScrollPrev(emblaApi.canScrollPrev());
+      setCanScrollNext(emblaApi.canScrollNext());
+    };
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
     onSelect();
@@ -280,8 +327,8 @@ function ProjetosSection() {
   }, [tab, emblaApi]);
 
   return (
-    <section id="projetos" className="w-full px-6 md:px-16 py-24 md:py-32">
-      <div className="max-w-6xl mx-auto">
+    <section id="projetos" className="w-full py-24 md:py-32">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-16">
         <Reveal>
           <p className="text-sm tracking-[0.3em] font-semibold mb-4" style={{ color: ORANGE }}>
             PROJETOS
@@ -292,7 +339,7 @@ function ProjetosSection() {
         </Reveal>
 
         {/* Abas */}
-        <div className="flex gap-3 mb-12">
+        <div className="flex gap-3 mb-8">
           {(["video", "foto"] as const).map((t) => (
             <button
               key={t}
@@ -307,112 +354,41 @@ function ProjetosSection() {
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Carrossel em destaque */}
-        <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex -ml-4 md:-ml-6">
-              {filtered.map((project) => (
-                <div key={project.id} className="min-w-0 shrink-0 grow-0 basis-[88%] sm:basis-[70%] lg:basis-[62%] pl-4 md:pl-6">
-                  <ProjectSlide project={project} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {filtered.length > 1 && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="flex gap-2">
-                {filtered.map((_, i) => (
-                  <span
-                    key={i}
-                    className="h-1.5 rounded-full transition-all"
-                    style={{
-                      width: i === selectedIndex ? "2rem" : "0.375rem",
-                      backgroundColor: i === selectedIndex ? ORANGE : "rgba(255,255,255,0.2)",
-                    }}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-3">
-                <button
-                  aria-label="Projeto anterior"
-                  onClick={() => emblaApi?.scrollPrev()}
-                  className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                </button>
-                <button
-                  aria-label="Próximo projeto"
-                  onClick={() => emblaApi?.scrollNext()}
-                  className="liquid-glass w-11 h-11 rounded-full flex items-center justify-center transition-colors hover:border-white/40"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Grade de mídia — só faz sentido pra folhear quando há mais de um
-            projeto; com um só, ela apenas repetia o mesmo card do carrossel. */}
-        {filtered.length > 1 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mt-20">
-            {filtered.map((project, i) => (
-              <Reveal key={project.id} delay={(i % 3) * 0.1} y={24}>
+      {/* Fileira estilo Netflix: cards menores, vários por tela, com o
+          próximo "espiando" na borda pra convidar a rolar. */}
+      <div className="relative group/row">
+        <div className="overflow-hidden px-6 md:px-16" ref={emblaRef}>
+          <div className="flex -ml-3 md:-ml-4">
+            {filtered.map((project) => (
               <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setSelectedProject(project)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setSelectedProject(project);
-                  }
-                }}
-                className={cn(
-                  "group relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
-                  project.gradient,
-                )}
+                key={project.id}
+                className="min-w-0 shrink-0 grow-0 basis-[58%] sm:basis-[34%] md:basis-[26%] lg:basis-[20%] pl-3 md:pl-4"
               >
-                {project.video ? (
-                  <video
-                    src={project.video}
-                    poster={project.image}
-                    muted
-                    loop
-                    playsInline
-                    preload="none"
-                    className="absolute inset-0 w-full h-full object-contain bg-black"
-                    onMouseEnter={(e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.pause();
-                      e.currentTarget.currentTime = 0;
-                    }}
-                  />
-                ) : project.image ? (
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <CategoryIcon category={project.category} className="w-8 h-8 text-white/10" />
-                  </div>
-                )}
-                <div className="absolute inset-x-3 bottom-3 liquid-glass rounded-xl px-4 py-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                  <p className="text-xs font-semibold tracking-wide uppercase" style={{ color: ORANGE }}>
-                    {project.tag}
-                  </p>
-                  <p className="text-sm font-semibold leading-snug">{project.title}</p>
-                </div>
+                <ProjectRowCard project={project} onSelect={() => setSelectedProject(project)} />
               </div>
-              </Reveal>
             ))}
           </div>
+        </div>
+
+        {canScrollPrev && (
+          <button
+            aria-label="Rolar para o projeto anterior"
+            onClick={() => emblaApi?.scrollPrev()}
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 liquid-glass w-11 h-11 rounded-full items-center justify-center transition-opacity opacity-0 group-hover/row:opacity-100 hover:border-white/40"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+        )}
+        {canScrollNext && (
+          <button
+            aria-label="Rolar para o próximo projeto"
+            onClick={() => emblaApi?.scrollNext()}
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 liquid-glass w-11 h-11 rounded-full items-center justify-center transition-opacity opacity-0 group-hover/row:opacity-100 hover:border-white/40"
+          >
+            <ArrowRight className="w-5 h-5" />
+          </button>
         )}
       </div>
 
