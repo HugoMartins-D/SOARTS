@@ -166,7 +166,7 @@ function ProjectRowCard({ project, onSelect }: { project: Project; onSelect: () 
           muted
           loop
           playsInline
-          preload="none"
+          preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
           onMouseEnter={(e) => e.currentTarget.play()}
           onMouseLeave={(e) => {
