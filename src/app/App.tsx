@@ -5,7 +5,7 @@ import { gsap, prefersReducedMotion } from "@/app/lib/gsap";
 import { Reveal } from "@/app/components/anim/Reveal";
 import { Magnetic } from "@/app/components/anim/Magnetic";
 import useEmblaCarousel from "embla-carousel-react";
-import { ArrowLeft, ArrowRight, ArrowUp, Camera, Instagram, Menu, Play, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUp, Camera, Images, Instagram, Menu, Play, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
 import { GooeyRevealHero } from "@/app/components/hero/gooey-reveal-hero";
 import { FranciscoCard } from "@/app/components/sobre/francisco-card";
@@ -56,6 +56,9 @@ type Project = {
   gradient: string;
   image?: string;
   video?: string;
+  // Galeria completa (capa + extras) pra projetos de foto com mais de uma
+  // imagem. Sempre tem pelo menos `image` dentro quando é foto.
+  photos?: string[];
 };
 
 const FALLBACK_GRADIENT = "from-[#1c1408] via-[#100b06] to-black";
@@ -63,6 +66,11 @@ const FALLBACK_GRADIENT = "from-[#1c1408] via-[#100b06] to-black";
 function projectFromRow(row: ProjectRow): Project {
   const mediaUrl = publicMediaUrl(row.media_path);
   const coverUrl = row.thumbnail_path ? publicMediaUrl(row.thumbnail_path) : undefined;
+
+  const extraPhotos = (row.project_photos ?? [])
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .map((p) => publicMediaUrl(p.path));
 
   return {
     id: row.id,
@@ -73,6 +81,7 @@ function projectFromRow(row: ProjectRow): Project {
     gradient: FALLBACK_GRADIENT,
     image: row.category === "foto" ? mediaUrl : coverUrl,
     video: row.category === "video" ? mediaUrl : undefined,
+    photos: row.category === "foto" ? [mediaUrl, ...extraPhotos] : undefined,
   };
 }
 
@@ -202,14 +211,27 @@ function ProjectRowCard({ project, onSelect }: { project: Project; onSelect: () 
           <Play className="w-3.5 h-3.5" fill="currentColor" strokeWidth={0} />
         </div>
       )}
+      {project.photos && project.photos.length > 1 && (
+        <div className="absolute top-3 right-3 h-7 px-2.5 rounded-full liquid-glass flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Images className="w-3.5 h-3.5" />
+          <span className="text-xs font-semibold">{project.photos.length}</span>
+        </div>
+      )}
     </div>
   );
 }
 
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const gallery = project.photos && project.photos.length > 1 ? project.photos : null;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeImage = gallery ? gallery[activeIndex] : project.image;
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
+      if (!gallery) return;
+      if (e.key === "ArrowRight") setActiveIndex((i) => (i + 1) % gallery.length);
+      if (e.key === "ArrowLeft") setActiveIndex((i) => (i - 1 + gallery.length) % gallery.length);
     }
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
@@ -217,7 +239,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onClose]);
+  }, [onClose, gallery]);
 
   return (
     <div
@@ -250,9 +272,9 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                 playsInline
                 className="absolute inset-0 w-full h-full object-contain bg-black"
               />
-            ) : project.image ? (
+            ) : activeImage ? (
               <img
-                src={project.image}
+                src={activeImage}
                 alt={project.title}
                 decoding="async"
                 className="absolute inset-0 w-full h-full object-contain bg-black"
@@ -262,7 +284,49 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
                 <CategoryIcon category={project.category} className="w-14 h-14 text-white/10" />
               </div>
             )}
+
+            {gallery && (
+              <>
+                <button
+                  aria-label="Foto anterior"
+                  onClick={() => setActiveIndex((i) => (i - 1 + gallery.length) % gallery.length)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:border-white/40 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <button
+                  aria-label="Próxima foto"
+                  onClick={() => setActiveIndex((i) => (i + 1) % gallery.length)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 liquid-glass w-10 h-10 rounded-full flex items-center justify-center hover:border-white/40 transition-colors"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <span className="absolute bottom-3 right-3 liquid-glass rounded-full px-3 py-1 text-xs font-semibold">
+                  {activeIndex + 1} / {gallery.length}
+                </span>
+              </>
+            )}
           </div>
+
+          {gallery && (
+            <div className="flex gap-2 overflow-x-auto px-6 md:px-8 pt-4">
+              {gallery.map((src, i) => (
+                <button
+                  key={src + i}
+                  onClick={() => setActiveIndex(i)}
+                  aria-label={`Ver foto ${i + 1}`}
+                  className={cn(
+                    "shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-colors",
+                    i === activeIndex ? "border-white" : "border-transparent opacity-60 hover:opacity-100",
+                  )}
+                  style={i === activeIndex ? { borderColor: ORANGE } : undefined}
+                >
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="p-6 md:p-8">
             <span className="text-xs tracking-[0.2em] font-semibold uppercase" style={{ color: ORANGE }}>
               {project.tag}
