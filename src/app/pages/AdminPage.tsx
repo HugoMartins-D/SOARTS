@@ -83,6 +83,7 @@ function Dashboard() {
   const [form, setForm] = useState(emptyForm);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [thumbFile, setThumbFile] = useState<File | null>(null);
+  const [extraPhotoFiles, setExtraPhotoFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [compressProgress, setCompressProgress] = useState<number | null>(null);
@@ -93,7 +94,7 @@ function Dashboard() {
     setLoadingList(true);
     const { data } = await supabase
       .from("projects")
-      .select("*")
+      .select("*, project_photos(id, path, position)")
       .order("position", { ascending: true })
       .order("created_at", { ascending: false });
     setProjects(data ?? []);
@@ -138,6 +139,7 @@ function Dashboard() {
     });
     setMediaFile(null);
     setThumbFile(null);
+    setExtraPhotoFiles([]);
     setFormError(null);
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -147,7 +149,14 @@ function Dashboard() {
     setForm(emptyForm);
     setMediaFile(null);
     setThumbFile(null);
+    setExtraPhotoFiles([]);
     setFormError(null);
+  }
+
+  async function handleDeleteExtraPhoto(photo: { id: string; path: string }) {
+    await supabase.storage.from("project-media").remove([photo.path]);
+    await supabase.from("project_photos").delete().eq("id", photo.id);
+    await loadProjects();
   }
 
   async function handleSubmitProject(e: React.FormEvent) {
@@ -207,6 +216,8 @@ function Dashboard() {
         updates.thumbnail_path = thumbnailPath;
       }
 
+      let projectId = editingId;
+
       if (editingId) {
         const previous = projects.find((p) => p.id === editingId);
         const { error: updateErr } = await supabase
@@ -224,13 +235,36 @@ function Dashboard() {
           if (stale.length) await supabase.storage.from("project-media").remove(stale);
         }
       } else {
-        const { error: insertErr } = await supabase.from("projects").insert(updates);
+        const { data: inserted, error: insertErr } = await supabase
+          .from("projects")
+          .insert(updates)
+          .select("id")
+          .single();
         if (insertErr) throw insertErr;
+        projectId = inserted.id;
+      }
+
+      // Fotos extras só se acumulam (nunca substituem as já existentes) —
+      // apagar uma é uma ação separada, feita direto na lista abaixo.
+      if (extraPhotoFiles.length && projectId) {
+        const newPhotos: { project_id: string; path: string }[] = [];
+        for (const file of extraPhotoFiles) {
+          const ext = file.name.split(".").pop() ?? "jpg";
+          const path = `${crypto.randomUUID()}/photo.${ext}`;
+          const { error: uploadErr } = await supabase.storage
+            .from("project-media")
+            .upload(path, file);
+          if (uploadErr) throw uploadErr;
+          newPhotos.push({ project_id: projectId, path });
+        }
+        const { error: photosErr } = await supabase.from("project_photos").insert(newPhotos);
+        if (photosErr) throw photosErr;
       }
 
       setForm(emptyForm);
       setMediaFile(null);
       setThumbFile(null);
+      setExtraPhotoFiles([]);
       setEditingId(null);
       await loadProjects();
     } catch (err) {
@@ -243,8 +277,12 @@ function Dashboard() {
 
   async function handleDelete(project: ProjectRow) {
     if (!confirm(`Apagar "${project.title}"? Essa ação não pode ser desfeita.`)) return;
-    const paths = [project.media_path, project.thumbnail_path].filter(Boolean) as string[];
+    const extraPaths = (project.project_photos ?? []).map((p) => p.path);
+    const paths = [project.media_path, project.thumbnail_path, ...extraPaths].filter(
+      Boolean,
+    ) as string[];
     if (paths.length) await supabase.storage.from("project-media").remove(paths);
+    // As linhas de project_photos somem sozinhas (on delete cascade).
     await supabase.from("projects").delete().eq("id", project.id);
     if (editingId === project.id) cancelEdit();
     await loadProjects();
@@ -398,6 +436,54 @@ function Dashboard() {
             </div>
           )}
 
+          {form.category === "foto" && (
+            <div>
+              <label className="text-white/70 text-sm block mb-1">
+                Mais fotos (opcional) — além da de cima, todas entram na galeria do projeto
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setExtraPhotoFiles(Array.from(e.target.files ?? []))}
+                className="w-full text-sm text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white"
+              />
+              {extraPhotoFiles.length > 0 && (
+                <p className="text-white/40 text-xs mt-1">
+                  {extraPhotoFiles.length} foto{extraPhotoFiles.length > 1 ? "s" : ""} selecionada
+                  {extraPhotoFiles.length > 1 ? "s" : ""}
+                </p>
+              )}
+
+              {editingId &&
+                (() => {
+                  const current = projects.find((p) => p.id === editingId)?.project_photos ?? [];
+                  if (!current.length) return null;
+                  return (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {current.map((photo) => (
+                        <div key={photo.id} className="relative w-16 h-16 rounded-lg overflow-hidden group">
+                          <img
+                            src={publicMediaUrl(photo.path)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteExtraPhoto(photo)}
+                            aria-label="Remover esta foto"
+                            className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+            </div>
+          )}
+
           {compressProgress !== null && (
             <p className="text-white/50 text-xs">
               Reduzindo o vídeo antes de publicar… {Math.round(compressProgress * 100)}%
@@ -480,7 +566,16 @@ function Dashboard() {
                       <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: ORANGE }}>
                         {project.tag}
                       </p>
-                      <p className="font-semibold truncate">{project.title}</p>
+                      <p className="font-semibold truncate">
+                        {project.title}
+                        {project.project_photos && project.project_photos.length > 0 && (
+                          <span className="text-white/40 font-normal text-sm">
+                            {" "}
+                            (+{project.project_photos.length} foto
+                            {project.project_photos.length > 1 ? "s" : ""})
+                          </span>
+                        )}
+                      </p>
                     </div>
 
                     <div className="shrink-0 flex items-center gap-2">
