@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { Pencil, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Trash2, X } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { publicMediaUrl, type ProjectRow } from "@/utils/projects";
 import type { LeadRow } from "@/utils/leads";
@@ -250,6 +250,26 @@ function Dashboard() {
     await loadProjects();
   }
 
+  // Muda a posição de um projeto na lista, trocando de lugar com o vizinho.
+  // Como todo projeto novo nasce com position=0 (empatado), renumerar a
+  // lista inteira pelo índice atual evita empates e mantém tudo consistente
+  // com a ordem exibida — o custo é irrelevante pro tamanho dessa lista.
+  async function moveProject(index: number, direction: -1 | 1) {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= projects.length) return;
+
+    const reordered = [...projects];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    setProjects(reordered);
+
+    await Promise.all(
+      reordered.map((project, i) =>
+        supabase.from("projects").update({ position: i }).eq("id", project.id),
+      ),
+    );
+    await loadProjects();
+  }
+
   return (
     <div className="min-h-screen bg-black text-white font-['Inter',sans-serif]">
       <header className="flex items-center justify-between px-6 md:px-16 py-6 border-b border-white/10">
@@ -404,25 +424,49 @@ function Dashboard() {
 
         {/* Lista de projetos existentes */}
         <div>
-          <h2 className="text-lg font-bold mb-4">Projetos publicados</h2>
+          <h2 className="text-lg font-bold mb-1">Projetos publicados</h2>
+          {projects.length > 1 && (
+            <p className="text-white/40 text-xs mb-4">
+              Use as setas para definir a ordem em que aparecem no site.
+            </p>
+          )}
           {loadingList ? (
             <p className="text-white/40">Carregando…</p>
           ) : projects.length === 0 ? (
             <p className="text-white/40">Nenhum projeto ainda. Adicione o primeiro ao lado.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
-              {projects.map((project) => {
+            <div className="space-y-3">
+              {projects.map((project, index) => {
                 const previewPath = project.thumbnail_path ?? project.media_path;
                 const isVideoPreview = !project.thumbnail_path && project.category === "video";
                 return (
                   <div
                     key={project.id}
-                    className="liquid-glass rounded-2xl overflow-hidden"
+                    className="liquid-glass rounded-2xl p-3 flex items-center gap-3"
                     style={editingId === project.id ? { boxShadow: `0 0 0 2px ${ORANGE}` } : undefined}
                   >
-                    <div className="aspect-video bg-black/40 relative">
+                    <div className="flex flex-col gap-1 shrink-0">
+                      <button
+                        onClick={() => moveProject(index, -1)}
+                        disabled={index === 0}
+                        aria-label={`Mover ${project.title} para cima`}
+                        className="w-7 h-7 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => moveProject(index, 1)}
+                        disabled={index === projects.length - 1}
+                        aria-label={`Mover ${project.title} para baixo`}
+                        className="w-7 h-7 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="w-24 aspect-video rounded-lg overflow-hidden bg-black/40 shrink-0">
                       {isVideoPreview ? (
-                        <video src={publicMediaUrl(previewPath)} muted className="w-full h-full object-contain bg-black" />
+                        <video src={publicMediaUrl(previewPath)} muted className="w-full h-full object-cover" />
                       ) : (
                         <img
                           src={publicMediaUrl(previewPath)}
@@ -431,29 +475,29 @@ function Dashboard() {
                         />
                       )}
                     </div>
-                    <div className="p-4 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: ORANGE }}>
-                          {project.tag}
-                        </p>
-                        <p className="font-semibold truncate">{project.title}</p>
-                      </div>
-                      <div className="shrink-0 flex items-center gap-2">
-                        <button
-                          onClick={() => startEdit(project)}
-                          aria-label={`Editar ${project.title}`}
-                          className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(project)}
-                          aria-label={`Apagar ${project.title}`}
-                          className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: ORANGE }}>
+                        {project.tag}
+                      </p>
+                      <p className="font-semibold truncate">{project.title}</p>
+                    </div>
+
+                    <div className="shrink-0 flex items-center gap-2">
+                      <button
+                        onClick={() => startEdit(project)}
+                        aria-label={`Editar ${project.title}`}
+                        className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(project)}
+                        aria-label={`Apagar ${project.title}`}
+                        className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 );
