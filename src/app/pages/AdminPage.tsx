@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { publicMediaUrl, type ProjectRow } from "@/utils/projects";
 import type { LeadRow } from "@/utils/leads";
+import { compressVideo } from "@/utils/compressVideo";
 
 const ORANGE = "#FF5200";
 
@@ -84,6 +85,7 @@ function Dashboard() {
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [compressProgress, setCompressProgress] = useState<number | null>(null);
 
   const loadProjects = useCallback(async () => {
     setLoadingList(true);
@@ -135,13 +137,20 @@ function Dashboard() {
 
     setSubmitting(true);
     try {
+      let fileToUpload = mediaFile;
+      if (form.category === "video") {
+        setCompressProgress(0);
+        fileToUpload = await compressVideo(mediaFile, setCompressProgress);
+        setCompressProgress(null);
+      }
+
       const id = crypto.randomUUID();
-      const mediaExt = mediaFile.name.split(".").pop() ?? "bin";
+      const mediaExt = fileToUpload.name.split(".").pop() ?? "bin";
       const mediaPath = `${id}/media.${mediaExt}`;
 
       const { error: mediaErr } = await supabase.storage
         .from("project-media")
-        .upload(mediaPath, mediaFile);
+        .upload(mediaPath, fileToUpload);
       if (mediaErr) throw mediaErr;
 
       let thumbnailPath: string | null = null;
@@ -172,6 +181,7 @@ function Dashboard() {
       setFormError(err instanceof Error ? err.message : "Erro ao enviar o projeto.");
     } finally {
       setSubmitting(false);
+      setCompressProgress(null);
     }
   }
 
@@ -286,6 +296,12 @@ function Dashboard() {
             </div>
           )}
 
+          {compressProgress !== null && (
+            <p className="text-white/50 text-xs">
+              Reduzindo o vídeo antes de publicar… {Math.round(compressProgress * 100)}%
+            </p>
+          )}
+
           {formError && <p className="text-red-400 text-sm">{formError}</p>}
 
           <button
@@ -294,7 +310,11 @@ function Dashboard() {
             className="w-full text-white font-bold py-3 rounded-full transition-colors disabled:opacity-50"
             style={{ backgroundColor: ORANGE }}
           >
-            {submitting ? "Enviando…" : "Adicionar projeto"}
+            {compressProgress !== null
+              ? "Reduzindo vídeo…"
+              : submitting
+                ? "Enviando…"
+                : "Adicionar projeto"}
           </button>
         </form>
 

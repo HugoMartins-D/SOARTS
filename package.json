@@ -8,6 +8,8 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@gsap/react": "^2.1.2",
     "@supabase/supabase-js": "^2.112.2",
     "clsx": "2.1.1",
