@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2, X } from "lucide-react";
 import { supabase } from "@/utils/supabase";
 import { publicMediaUrl, type ProjectRow } from "@/utils/projects";
 import type { LeadRow } from "@/utils/leads";
@@ -86,6 +86,8 @@ function Dashboard() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [compressProgress, setCompressProgress] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const loadProjects = useCallback(async () => {
     setLoadingList(true);
@@ -126,59 +128,113 @@ function Dashboard() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  async function handleAddProject(e: React.FormEvent) {
+  function startEdit(project: ProjectRow) {
+    setEditingId(project.id);
+    setForm({
+      title: project.title,
+      category: project.category,
+      tag: project.tag,
+      description: project.description,
+    });
+    setMediaFile(null);
+    setThumbFile(null);
+    setFormError(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setForm(emptyForm);
+    setMediaFile(null);
+    setThumbFile(null);
+    setFormError(null);
+  }
+
+  async function handleSubmitProject(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
 
-    if (!mediaFile) {
+    if (!editingId && !mediaFile) {
       setFormError("Selecione o arquivo de vídeo ou foto.");
       return;
     }
 
     setSubmitting(true);
     try {
-      let fileToUpload = mediaFile;
-      if (form.category === "video") {
-        setCompressProgress(0);
-        fileToUpload = await compressVideo(mediaFile, setCompressProgress);
-        setCompressProgress(null);
-      }
-
-      const id = crypto.randomUUID();
-      const mediaExt = fileToUpload.name.split(".").pop() ?? "bin";
-      const mediaPath = `${id}/media.${mediaExt}`;
-
-      const { error: mediaErr } = await supabase.storage
-        .from("project-media")
-        .upload(mediaPath, fileToUpload);
-      if (mediaErr) throw mediaErr;
-
-      let thumbnailPath: string | null = null;
-      if (thumbFile) {
-        const thumbExt = thumbFile.name.split(".").pop() ?? "jpg";
-        thumbnailPath = `${id}/thumb.${thumbExt}`;
-        const { error: thumbErr } = await supabase.storage
-          .from("project-media")
-          .upload(thumbnailPath, thumbFile);
-        if (thumbErr) throw thumbErr;
-      }
-
-      const { error: insertErr } = await supabase.from("projects").insert({
+      const updates: {
+        title: string;
+        category: "video" | "foto";
+        tag: string;
+        description: string;
+        media_path?: string;
+        thumbnail_path?: string | null;
+      } = {
         title: form.title,
         category: form.category,
         tag: form.tag,
         description: form.description,
-        media_path: mediaPath,
-        thumbnail_path: thumbnailPath,
-      });
-      if (insertErr) throw insertErr;
+      };
+
+      // Replacing the media file is optional while editing; the text fields
+      // above can be saved on their own without touching storage at all.
+      if (mediaFile) {
+        let fileToUpload = mediaFile;
+        if (form.category === "video") {
+          setCompressProgress(0);
+          fileToUpload = await compressVideo(mediaFile, setCompressProgress);
+          setCompressProgress(null);
+        }
+
+        const id = crypto.randomUUID();
+        const mediaExt = fileToUpload.name.split(".").pop() ?? "bin";
+        const mediaPath = `${id}/media.${mediaExt}`;
+
+        const { error: mediaErr } = await supabase.storage
+          .from("project-media")
+          .upload(mediaPath, fileToUpload);
+        if (mediaErr) throw mediaErr;
+        updates.media_path = mediaPath;
+
+        let thumbnailPath: string | null = null;
+        if (thumbFile) {
+          const thumbExt = thumbFile.name.split(".").pop() ?? "jpg";
+          thumbnailPath = `${id}/thumb.${thumbExt}`;
+          const { error: thumbErr } = await supabase.storage
+            .from("project-media")
+            .upload(thumbnailPath, thumbFile);
+          if (thumbErr) throw thumbErr;
+        }
+        updates.thumbnail_path = thumbnailPath;
+      }
+
+      if (editingId) {
+        const previous = projects.find((p) => p.id === editingId);
+        const { error: updateErr } = await supabase
+          .from("projects")
+          .update(updates)
+          .eq("id", editingId);
+        if (updateErr) throw updateErr;
+
+        // Only clean up the old storage files once the row update above
+        // succeeded, and only when they were actually replaced.
+        if (updates.media_path && previous) {
+          const stale = [previous.media_path, previous.thumbnail_path].filter(
+            Boolean,
+          ) as string[];
+          if (stale.length) await supabase.storage.from("project-media").remove(stale);
+        }
+      } else {
+        const { error: insertErr } = await supabase.from("projects").insert(updates);
+        if (insertErr) throw insertErr;
+      }
 
       setForm(emptyForm);
       setMediaFile(null);
       setThumbFile(null);
+      setEditingId(null);
       await loadProjects();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Erro ao enviar o projeto.");
+      setFormError(err instanceof Error ? err.message : "Erro ao salvar o projeto.");
     } finally {
       setSubmitting(false);
       setCompressProgress(null);
@@ -190,6 +246,7 @@ function Dashboard() {
     const paths = [project.media_path, project.thumbnail_path].filter(Boolean) as string[];
     if (paths.length) await supabase.storage.from("project-media").remove(paths);
     await supabase.from("projects").delete().eq("id", project.id);
+    if (editingId === project.id) cancelEdit();
     await loadProjects();
   }
 
@@ -216,9 +273,25 @@ function Dashboard() {
       </header>
 
       <main className="px-6 md:px-16 py-12 max-w-6xl mx-auto grid lg:grid-cols-[380px_1fr] gap-12">
-        {/* Formulário de novo projeto */}
-        <form onSubmit={handleAddProject} className="liquid-glass rounded-3xl p-6 space-y-4 h-fit">
-          <h2 className="text-lg font-bold mb-2">Novo projeto</h2>
+        {/* Formulário de novo projeto / edição */}
+        <form
+          ref={formRef}
+          onSubmit={handleSubmitProject}
+          className="liquid-glass rounded-3xl p-6 space-y-4 h-fit"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold">{editingId ? "Editar projeto" : "Novo projeto"}</h2>
+            {editingId && (
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-white/50 hover:text-white text-sm flex items-center gap-1 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancelar
+              </button>
+            )}
+          </div>
 
           <div className="flex gap-2">
             {(["video", "foto"] as const).map((cat) => (
@@ -237,6 +310,11 @@ function Dashboard() {
               </button>
             ))}
           </div>
+          {editingId && (
+            <p className="text-white/40 text-xs -mt-2">
+              Se mudar o tipo, envie também um novo arquivo compatível abaixo.
+            </p>
+          )}
 
           <div>
             <label className="text-white/70 text-sm block mb-1">Título</label>
@@ -274,10 +352,11 @@ function Dashboard() {
           <div>
             <label className="text-white/70 text-sm block mb-1">
               {form.category === "video" ? "Arquivo de vídeo" : "Arquivo de foto"}
+              {editingId && " (opcional — deixe em branco pra manter o atual)"}
             </label>
             <input
               type="file"
-              required
+              required={!editingId}
               accept={form.category === "video" ? "video/*" : "image/*"}
               onChange={(e) => setMediaFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-white"
@@ -286,7 +365,10 @@ function Dashboard() {
 
           {form.category === "video" && (
             <div>
-              <label className="text-white/70 text-sm block mb-1">Capa (opcional, recomendado)</label>
+              <label className="text-white/70 text-sm block mb-1">
+                Capa (opcional, recomendado)
+                {editingId && !mediaFile && " — só é usada se você também enviar um vídeo novo"}
+              </label>
               <input
                 type="file"
                 accept="image/*"
@@ -313,8 +395,10 @@ function Dashboard() {
             {compressProgress !== null
               ? "Reduzindo vídeo…"
               : submitting
-                ? "Enviando…"
-                : "Adicionar projeto"}
+                ? "Salvando…"
+                : editingId
+                  ? "Salvar alterações"
+                  : "Adicionar projeto"}
           </button>
         </form>
 
@@ -331,7 +415,11 @@ function Dashboard() {
                 const previewPath = project.thumbnail_path ?? project.media_path;
                 const isVideoPreview = !project.thumbnail_path && project.category === "video";
                 return (
-                  <div key={project.id} className="liquid-glass rounded-2xl overflow-hidden">
+                  <div
+                    key={project.id}
+                    className="liquid-glass rounded-2xl overflow-hidden"
+                    style={editingId === project.id ? { boxShadow: `0 0 0 2px ${ORANGE}` } : undefined}
+                  >
                     <div className="aspect-video bg-black/40 relative">
                       {isVideoPreview ? (
                         <video src={publicMediaUrl(previewPath)} muted className="w-full h-full object-contain bg-black" />
@@ -350,13 +438,22 @@ function Dashboard() {
                         </p>
                         <p className="font-semibold truncate">{project.title}</p>
                       </div>
-                      <button
-                        onClick={() => handleDelete(project)}
-                        aria-label={`Apagar ${project.title}`}
-                        className="shrink-0 w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="shrink-0 flex items-center gap-2">
+                        <button
+                          onClick={() => startEdit(project)}
+                          aria-label={`Editar ${project.title}`}
+                          className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(project)}
+                          aria-label={`Apagar ${project.title}`}
+                          className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
