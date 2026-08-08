@@ -33,4 +33,10 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  optimizeDeps: {
+    // ffmpeg.wasm spawns an internal Web Worker via `new URL(...)`; Vite's
+    // dependency pre-bundler breaks that resolution unless these are excluded.
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+  },
 })
