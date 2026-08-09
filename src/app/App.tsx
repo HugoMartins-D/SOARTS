@@ -423,7 +423,18 @@ function ProjetosSection() {
       {/* Fileira estilo Netflix: cards menores, vários por tela, com o
           próximo "espiando" na borda pra convidar a rolar. */}
       <div className="relative group/row">
-        <div className="overflow-hidden px-6 md:px-16" ref={emblaRef}>
+        {/*
+          touch-pan-y + overscroll-x-contain: sem isso, um arrasto horizontal
+          no celular pode "vazar" pro navegador rolar a página inteira pro
+          lado (às vezes até com um solavanco elástico) em vez de mexer só
+          nessa fileira — problema clássico de carrossel horizontal em touch.
+          touch-pan-y avisa o navegador que ele só deve tratar gestos
+          verticais nativamente; o horizontal fica só por conta do Embla.
+        */}
+        <div
+          className="overflow-hidden px-6 md:px-16 touch-pan-y overscroll-x-contain"
+          ref={emblaRef}
+        >
           <div className="flex -ml-3 md:-ml-4">
             {filtered.map((project) => (
               <div
