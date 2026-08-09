@@ -5,6 +5,8 @@ import { supabase } from "@/utils/supabase";
 import { publicMediaUrl, type ProjectRow } from "@/utils/projects";
 import type { LeadRow } from "@/utils/leads";
 import { compressVideo } from "@/utils/compressVideo";
+import { compressImage } from "@/utils/compressImage";
+import { extractVideoFrame } from "@/utils/extractVideoFrame";
 
 const ORANGE = "#FF5200";
 
@@ -188,10 +190,18 @@ function Dashboard() {
       // above can be saved on their own without touching storage at all.
       if (mediaFile) {
         let fileToUpload = mediaFile;
+        let posterFile: File | null = thumbFile ? await compressImage(thumbFile) : null;
+
         if (form.category === "video") {
           setCompressProgress(0);
           fileToUpload = await compressVideo(mediaFile, setCompressProgress);
           setCompressProgress(null);
+          // Sem capa própria, tira um frame do vídeo já comprimido — sem
+          // isso o card depende do navegador buscar um frame sozinho, o que
+          // é inconsistente no mobile e deixava o card preto.
+          if (!posterFile) posterFile = await extractVideoFrame(fileToUpload);
+        } else {
+          fileToUpload = await compressImage(mediaFile);
         }
 
         const id = crypto.randomUUID();
@@ -205,12 +215,12 @@ function Dashboard() {
         updates.media_path = mediaPath;
 
         let thumbnailPath: string | null = null;
-        if (thumbFile) {
-          const thumbExt = thumbFile.name.split(".").pop() ?? "jpg";
+        if (posterFile) {
+          const thumbExt = posterFile.name.split(".").pop() ?? "jpg";
           thumbnailPath = `${id}/thumb.${thumbExt}`;
           const { error: thumbErr } = await supabase.storage
             .from("project-media")
-            .upload(thumbnailPath, thumbFile);
+            .upload(thumbnailPath, posterFile);
           if (thumbErr) throw thumbErr;
         }
         updates.thumbnail_path = thumbnailPath;
@@ -248,7 +258,8 @@ function Dashboard() {
       // apagar uma é uma ação separada, feita direto na lista abaixo.
       if (extraPhotoFiles.length && projectId) {
         const newPhotos: { project_id: string; path: string }[] = [];
-        for (const file of extraPhotoFiles) {
+        for (const rawFile of extraPhotoFiles) {
+          const file = await compressImage(rawFile);
           const ext = file.name.split(".").pop() ?? "jpg";
           const path = `${crypto.randomUUID()}/photo.${ext}`;
           const { error: uploadErr } = await supabase.storage
