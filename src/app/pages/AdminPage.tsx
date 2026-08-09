@@ -90,6 +90,7 @@ function Dashboard() {
   const [formError, setFormError] = useState<string | null>(null);
   const [compressProgress, setCompressProgress] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [generatingCoverId, setGeneratingCoverId] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const loadProjects = useCallback(async () => {
@@ -161,6 +162,45 @@ function Dashboard() {
     await loadProjects();
   }
 
+  // Gera a capa de um vídeo que já está publicado, sem precisar reenviar o
+  // arquivo inteiro — baixa o vídeo já hospedado, extrai um frame no
+  // navegador e sobe só a imagem. Resolve os vídeos antigos que ficaram sem
+  // capa antes do upload passar a gerar isso automaticamente.
+  async function handleAutoGenerateCover(project: ProjectRow) {
+    setGeneratingCoverId(project.id);
+    setFormError(null);
+    try {
+      const res = await fetch(publicMediaUrl(project.media_path));
+      if (!res.ok) throw new Error("Não foi possível baixar o vídeo publicado.");
+      const blob = await res.blob();
+      const videoFile = new File([blob], "video.mp4", { type: blob.type || "video/mp4" });
+
+      const posterFile = await extractVideoFrame(videoFile);
+      if (!posterFile) throw new Error("Não foi possível extrair um frame desse vídeo.");
+
+      const folderId = project.media_path.split("/")[0];
+      const thumbnailPath = `${folderId}/thumb.jpg`;
+      const { error: thumbErr } = await supabase.storage
+        .from("project-media")
+        .upload(thumbnailPath, posterFile, { upsert: true });
+      if (thumbErr) throw thumbErr;
+
+      const { error: updateErr } = await supabase
+        .from("projects")
+        .update({ thumbnail_path: thumbnailPath })
+        .eq("id", project.id);
+      if (updateErr) throw updateErr;
+
+      await loadProjects();
+    } catch (err) {
+      setFormError(
+        err instanceof Error ? err.message : "Erro ao gerar a capa automaticamente.",
+      );
+    } finally {
+      setGeneratingCoverId(null);
+    }
+  }
+
   async function handleSubmitProject(e: React.FormEvent) {
     e.preventDefault();
     setFormError(null);
@@ -224,6 +264,19 @@ function Dashboard() {
           if (thumbErr) throw thumbErr;
         }
         updates.thumbnail_path = thumbnailPath;
+      } else if (thumbFile && editingId) {
+        // Trocar só a capa, sem reenviar o vídeo — evita comprimir de novo
+        // um arquivo que já está bom, só pra atualizar a imagem de capa.
+        const previous = projects.find((p) => p.id === editingId);
+        const posterFile = await compressImage(thumbFile);
+        const folderId = previous?.media_path?.split("/")[0] ?? crypto.randomUUID();
+        const thumbExt = posterFile.name.split(".").pop() ?? "jpg";
+        const thumbnailPath = `${folderId}/thumb.${thumbExt}`;
+        const { error: thumbErr } = await supabase.storage
+          .from("project-media")
+          .upload(thumbnailPath, posterFile, { upsert: true });
+        if (thumbErr) throw thumbErr;
+        updates.thumbnail_path = thumbnailPath;
       }
 
       let projectId = editingId;
@@ -243,6 +296,12 @@ function Dashboard() {
             Boolean,
           ) as string[];
           if (stale.length) await supabase.storage.from("project-media").remove(stale);
+        } else if (
+          updates.thumbnail_path &&
+          previous?.thumbnail_path &&
+          previous.thumbnail_path !== updates.thumbnail_path
+        ) {
+          await supabase.storage.from("project-media").remove([previous.thumbnail_path]);
         }
       } else {
         const { data: inserted, error: insertErr } = await supabase
@@ -587,6 +646,19 @@ function Dashboard() {
                           </span>
                         )}
                       </p>
+                      {project.category === "video" && !project.thumbnail_path && (
+                        <button
+                          type="button"
+                          onClick={() => handleAutoGenerateCover(project)}
+                          disabled={generatingCoverId === project.id}
+                          className="text-xs mt-1 hover:underline disabled:opacity-50 disabled:pointer-events-none"
+                          style={{ color: ORANGE }}
+                        >
+                          {generatingCoverId === project.id
+                            ? "Gerando capa…"
+                            : "Sem capa — gerar automaticamente"}
+                        </button>
+                      )}
                     </div>
 
                     <div className="shrink-0 flex items-center gap-2">
