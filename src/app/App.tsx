@@ -1104,10 +1104,18 @@ export default function App() {
             </div>
 
             {/* Só aparece em telas grandes (lg+), onde sobra vazio entre o texto e o retrato. */}
-            <div className="js-hero-stats hidden lg:flex items-start gap-8 xl:gap-12 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
-              {HERO_STATS.map((stat) => (
-                <CountUpStat key={stat.label} {...stat} />
-              ))}
+            <div className="js-hero-stats hidden lg:flex flex-col gap-6 pl-8 xl:pl-12 border-l border-white/10 shrink-0">
+              <div className="flex items-start gap-8 xl:gap-12">
+                {HERO_STATS.map((stat) => (
+                  <CountUpStat key={stat.label} {...stat} />
+                ))}
+              </div>
+              <p className="text-white/40 text-xs italic leading-relaxed max-w-[220px]">
+                "Profetiza sobre estes ossos, e dize-lhes: Ossos secos, ouvi a palavra do Senhor."
+                <span className="block not-italic text-white/25 mt-1.5 tracking-[0.2em] uppercase text-[0.65rem]">
+                  Ezequiel 37:4
+                </span>
+              </p>
             </div>
           </div>
         </div>
