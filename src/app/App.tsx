@@ -474,7 +474,7 @@ function ProjetosSection() {
   );
 }
 
-function SoartsLogo() {
+function SoartsLogo({ color = "white" }: { color?: string }) {
   return (
     <svg
       className="w-12 h-12 shrink-0"
@@ -483,42 +483,42 @@ function SoartsLogo() {
       viewBox="0 0 89 89.9299"
     >
       <g clipPath="url(#clip-logo-soarts)">
-        <path d={svgPaths.p9f30400} fill="white" />
-        <path d={svgPaths.p37271b00} fill="white" />
-        <path d={svgPaths.p2393e000} fill="white" />
-        <path d={svgPaths.pa249c80} fill="white" />
-        <path d={svgPaths.p22987c00} fill="white" />
-        <path d={svgPaths.p16217f00} fill="white" />
-        <path d={svgPaths.p2cd0b680} fill="white" />
-        <path d={svgPaths.p36ba8b00} fill="white" />
-        <path d={svgPaths.p28a221f0} fill="white" />
-        <path d={svgPaths.p4b7a800} fill="white" />
-        <path d={svgPaths.p1b4a2c80} fill="white" />
-        <path d={svgPaths.p1457c900} fill="white" />
-        <path d={svgPaths.p3412100} fill="white" />
-        <path d={svgPaths.p3aff3400} fill="white" />
-        <path d={svgPaths.p35a5cb00} fill="white" />
-        <path d={svgPaths.p19ae2580} fill="white" />
-        <path d={svgPaths.p2141cf80} fill="white" />
-        <path d={svgPaths.p39278830} fill="white" />
-        <path d={svgPaths.p155cde00} fill="white" />
-        <path d={svgPaths.p33d7f200} fill="white" />
-        <path d={svgPaths.p1422ba80} fill="white" />
-        <path d={svgPaths.p6748f00} fill="white" />
-        <path d={svgPaths.p9296300} fill="white" />
-        <path d={svgPaths.pd4f1000} fill="white" />
-        <path d={svgPaths.p2482ca00} fill="white" />
-        <path d={svgPaths.p12b17800} fill="white" />
-        <path d={svgPaths.p10021c00} fill="white" />
-        <path d={svgPaths.p20e8500} fill="white" />
-        <path d={svgPaths.p17b9b800} fill="white" />
-        <path d={svgPaths.p2495af00} fill="white" />
-        <path d={svgPaths.p3c6e4280} fill="white" />
-        <path d={svgPaths.p164f2500} fill="white" />
-        <path d={svgPaths.p38ace700} fill="white" />
-        <path d={svgPaths.p2aa42700} fill="white" />
-        <path d={svgPaths.p20f561c0} fill="white" />
-        <path d={svgPaths.p24778680} fill="white" />
+        <path d={svgPaths.p9f30400} fill={color} />
+        <path d={svgPaths.p37271b00} fill={color} />
+        <path d={svgPaths.p2393e000} fill={color} />
+        <path d={svgPaths.pa249c80} fill={color} />
+        <path d={svgPaths.p22987c00} fill={color} />
+        <path d={svgPaths.p16217f00} fill={color} />
+        <path d={svgPaths.p2cd0b680} fill={color} />
+        <path d={svgPaths.p36ba8b00} fill={color} />
+        <path d={svgPaths.p28a221f0} fill={color} />
+        <path d={svgPaths.p4b7a800} fill={color} />
+        <path d={svgPaths.p1b4a2c80} fill={color} />
+        <path d={svgPaths.p1457c900} fill={color} />
+        <path d={svgPaths.p3412100} fill={color} />
+        <path d={svgPaths.p3aff3400} fill={color} />
+        <path d={svgPaths.p35a5cb00} fill={color} />
+        <path d={svgPaths.p19ae2580} fill={color} />
+        <path d={svgPaths.p2141cf80} fill={color} />
+        <path d={svgPaths.p39278830} fill={color} />
+        <path d={svgPaths.p155cde00} fill={color} />
+        <path d={svgPaths.p33d7f200} fill={color} />
+        <path d={svgPaths.p1422ba80} fill={color} />
+        <path d={svgPaths.p6748f00} fill={color} />
+        <path d={svgPaths.p9296300} fill={color} />
+        <path d={svgPaths.pd4f1000} fill={color} />
+        <path d={svgPaths.p2482ca00} fill={color} />
+        <path d={svgPaths.p12b17800} fill={color} />
+        <path d={svgPaths.p10021c00} fill={color} />
+        <path d={svgPaths.p20e8500} fill={color} />
+        <path d={svgPaths.p17b9b800} fill={color} />
+        <path d={svgPaths.p2495af00} fill={color} />
+        <path d={svgPaths.p3c6e4280} fill={color} />
+        <path d={svgPaths.p164f2500} fill={color} />
+        <path d={svgPaths.p38ace700} fill={color} />
+        <path d={svgPaths.p2aa42700} fill={color} />
+        <path d={svgPaths.p20f561c0} fill={color} />
+        <path d={svgPaths.p24778680} fill={color} />
         <path d={svgPaths.p2cd54200} fill="black" />
         <path d={svgPaths.p3d403e00} fill="black" />
         <path d={svgPaths.pa24a00} fill="black" />
@@ -537,72 +537,72 @@ function SoartsLogo() {
         <path d={svgPaths.p1bcbd00} fill="black" />
         <path d={svgPaths.p37cdd680} fill="black" />
         <path d={svgPaths.p16724d80} fill="black" />
-        <path d={svgPaths.p1e5a470} fill="white" />
-        <path d={svgPaths.p11ebf580} fill="white" />
-        <path d={svgPaths.p7c8b280} fill="white" />
-        <path d={svgPaths.p34ac3500} fill="white" />
-        <path d={svgPaths.p20249e00} fill="white" />
-        <path d={svgPaths.pe15dd00} fill="white" />
-        <path d={svgPaths.pdc4a400} fill="white" />
-        <path d={svgPaths.p2af94100} fill="white" />
-        <path d={svgPaths.pb9f5100} fill="white" />
-        <path d={svgPaths.p2947ce00} fill="white" />
-        <path d={svgPaths.p1463a700} fill="white" />
-        <path d={svgPaths.p254c6800} fill="white" />
-        <path d={svgPaths.p140d8800} fill="white" />
-        <path d={svgPaths.p342502a} fill="white" />
-        <path d={svgPaths.p2b98ed00} fill="white" />
-        <path d={svgPaths.p256b1370} fill="white" />
-        <path d={svgPaths.p3354ed80} fill="white" />
-        <path d={svgPaths.p3f017c00} fill="white" />
-        <path d={svgPaths.p23bbd300} fill="white" />
-        <path d={svgPaths.p1c27500} fill="white" />
-        <path d={svgPaths.p4782700} fill="white" />
-        <path d={svgPaths.p78ced00} fill="white" />
-        <path d={svgPaths.p36e34b80} fill="white" />
-        <path d={svgPaths.p2e771300} fill="white" />
-        <path d={svgPaths.p110e6a00} fill="white" />
-        <path d={svgPaths.pfea0300} fill="white" />
-        <path d={svgPaths.p853e300} fill="white" />
-        <path d={svgPaths.p3a118af0} fill="white" />
-        <path d={svgPaths.p1d8f3df0} fill="white" />
-        <path d={svgPaths.p11574500} fill="white" />
-        <path d={svgPaths.p21c20800} fill="white" />
-        <path d={svgPaths.p3a228880} fill="white" />
-        <path d={svgPaths.p2e958000} fill="white" />
-        <path d={svgPaths.p3bf3a480} fill="white" />
-        <path d={svgPaths.pf634c00} fill="white" />
-        <path d={svgPaths.p30754000} fill="white" />
-        <path d={svgPaths.p1b614f00} fill="white" />
-        <path d={svgPaths.p14399d00} fill="white" />
-        <path d={svgPaths.p3fae60f0} fill="white" />
-        <path d={svgPaths.p2ec2d600} fill="white" />
-        <path d={svgPaths.p398c0300} fill="white" />
-        <path d={svgPaths.p3e02770} fill="white" />
-        <path d={svgPaths.p226ebc00} fill="white" />
-        <path d={svgPaths.p25420e80} fill="white" />
-        <path d={svgPaths.p122af00} fill="white" />
-        <path d={svgPaths.p25f6eb00} fill="white" />
-        <path d={svgPaths.p2938ac80} fill="white" />
-        <path d={svgPaths.p1110800} fill="white" />
-        <path d={svgPaths.pf9c2280} fill="white" />
-        <path d={svgPaths.p2fd2100} fill="white" />
-        <path d={svgPaths.p1d3ad300} fill="white" />
-        <path d={svgPaths.p1ac3d880} fill="white" />
-        <path d={svgPaths.p25bea080} fill="white" />
-        <path d={svgPaths.p9252e00} fill="white" />
-        <path d={svgPaths.p3d52700} fill="white" />
-        <path d={svgPaths.padbd300} fill="white" />
-        <path d={svgPaths.p37515400} fill="white" />
-        <path d={svgPaths.p1a52a600} fill="white" />
-        <path d={svgPaths.p111dad70} fill="white" />
-        <path d={svgPaths.p11c61370} fill="white" />
-        <path d={svgPaths.p2f86740} fill="white" />
-        <path d={svgPaths.pccf8880} fill="white" />
-        <path d={svgPaths.p173cc300} fill="white" />
-        <path d={svgPaths.p3fe6eb80} fill="white" />
-        <path d={svgPaths.p260d8000} fill="white" />
-        <path d={svgPaths.pa346d80} fill="white" />
+        <path d={svgPaths.p1e5a470} fill={color} />
+        <path d={svgPaths.p11ebf580} fill={color} />
+        <path d={svgPaths.p7c8b280} fill={color} />
+        <path d={svgPaths.p34ac3500} fill={color} />
+        <path d={svgPaths.p20249e00} fill={color} />
+        <path d={svgPaths.pe15dd00} fill={color} />
+        <path d={svgPaths.pdc4a400} fill={color} />
+        <path d={svgPaths.p2af94100} fill={color} />
+        <path d={svgPaths.pb9f5100} fill={color} />
+        <path d={svgPaths.p2947ce00} fill={color} />
+        <path d={svgPaths.p1463a700} fill={color} />
+        <path d={svgPaths.p254c6800} fill={color} />
+        <path d={svgPaths.p140d8800} fill={color} />
+        <path d={svgPaths.p342502a} fill={color} />
+        <path d={svgPaths.p2b98ed00} fill={color} />
+        <path d={svgPaths.p256b1370} fill={color} />
+        <path d={svgPaths.p3354ed80} fill={color} />
+        <path d={svgPaths.p3f017c00} fill={color} />
+        <path d={svgPaths.p23bbd300} fill={color} />
+        <path d={svgPaths.p1c27500} fill={color} />
+        <path d={svgPaths.p4782700} fill={color} />
+        <path d={svgPaths.p78ced00} fill={color} />
+        <path d={svgPaths.p36e34b80} fill={color} />
+        <path d={svgPaths.p2e771300} fill={color} />
+        <path d={svgPaths.p110e6a00} fill={color} />
+        <path d={svgPaths.pfea0300} fill={color} />
+        <path d={svgPaths.p853e300} fill={color} />
+        <path d={svgPaths.p3a118af0} fill={color} />
+        <path d={svgPaths.p1d8f3df0} fill={color} />
+        <path d={svgPaths.p11574500} fill={color} />
+        <path d={svgPaths.p21c20800} fill={color} />
+        <path d={svgPaths.p3a228880} fill={color} />
+        <path d={svgPaths.p2e958000} fill={color} />
+        <path d={svgPaths.p3bf3a480} fill={color} />
+        <path d={svgPaths.pf634c00} fill={color} />
+        <path d={svgPaths.p30754000} fill={color} />
+        <path d={svgPaths.p1b614f00} fill={color} />
+        <path d={svgPaths.p14399d00} fill={color} />
+        <path d={svgPaths.p3fae60f0} fill={color} />
+        <path d={svgPaths.p2ec2d600} fill={color} />
+        <path d={svgPaths.p398c0300} fill={color} />
+        <path d={svgPaths.p3e02770} fill={color} />
+        <path d={svgPaths.p226ebc00} fill={color} />
+        <path d={svgPaths.p25420e80} fill={color} />
+        <path d={svgPaths.p122af00} fill={color} />
+        <path d={svgPaths.p25f6eb00} fill={color} />
+        <path d={svgPaths.p2938ac80} fill={color} />
+        <path d={svgPaths.p1110800} fill={color} />
+        <path d={svgPaths.pf9c2280} fill={color} />
+        <path d={svgPaths.p2fd2100} fill={color} />
+        <path d={svgPaths.p1d3ad300} fill={color} />
+        <path d={svgPaths.p1ac3d880} fill={color} />
+        <path d={svgPaths.p25bea080} fill={color} />
+        <path d={svgPaths.p9252e00} fill={color} />
+        <path d={svgPaths.p3d52700} fill={color} />
+        <path d={svgPaths.padbd300} fill={color} />
+        <path d={svgPaths.p37515400} fill={color} />
+        <path d={svgPaths.p1a52a600} fill={color} />
+        <path d={svgPaths.p111dad70} fill={color} />
+        <path d={svgPaths.p11c61370} fill={color} />
+        <path d={svgPaths.p2f86740} fill={color} />
+        <path d={svgPaths.pccf8880} fill={color} />
+        <path d={svgPaths.p173cc300} fill={color} />
+        <path d={svgPaths.p3fe6eb80} fill={color} />
+        <path d={svgPaths.p260d8000} fill={color} />
+        <path d={svgPaths.pa346d80} fill={color} />
         <path d={svgPaths.p1875c100} fill="black" />
         <path d={svgPaths.p1356ee00} fill="black" />
       </g>
@@ -672,7 +672,7 @@ function Navbar() {
     <nav className={cn("fixed top-0 left-0 right-0 z-30 transition-colors duration-300", scrolled && "liquid-glass-nav")}>
       <div className="flex items-center justify-between px-6 md:px-16 py-5">
         <a href="#inicio" aria-label="SOARTS — início">
-          <SoartsLogo />
+          <SoartsLogo color={ORANGE} />
         </a>
 
         <ul className="hidden md:flex items-center gap-10 text-white text-sm tracking-[0.15em]">
