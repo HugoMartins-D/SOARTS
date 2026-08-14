@@ -15,6 +15,7 @@ import imgPromenac from "@/imports/LpSoarts-1/4f9ded526e079a81f945748a1d5b20399d
 import imgGlobo from "@/imports/LpSoarts-1/ebd2fbc1227c2348e8af1bd608466186a92edd14.png";
 import imgHelp from "@/imports/LpSoarts-1/logo-help.webp";
 import imgPixel from "@/imports/LpSoarts-1/logo-pixel.webp";
+import imgGacSuperAuto from "@/imports/LpSoarts-1/logo-gac-superauto.png";
 import svgPaths from "@/imports/LpSoarts-1/svg-0n58f4rxvu";
 
 const ORANGE = "#FF5200";
@@ -31,6 +32,7 @@ const BRANDS = [
   { src: imgPromenac, alt: "Promenac/Camvel", instagram: "https://www.instagram.com/promenaccamvel/" },
   { src: imgGlobo, alt: "Grupo Globo", instagram: "https://www.instagram.com/grupo.globo/" },
   { src: imgHelp, alt: "HelpSmart", instagram: "https://www.instagram.com/help.smartcell/" },
+  { src: imgGacSuperAuto, alt: "GAC SuperAuto", instagram: "" },
 ];
 
 /**
