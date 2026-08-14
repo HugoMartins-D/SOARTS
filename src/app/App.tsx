@@ -16,6 +16,7 @@ import imgGlobo from "@/imports/LpSoarts-1/ebd2fbc1227c2348e8af1bd608466186a92ed
 import imgHelp from "@/imports/LpSoarts-1/logo-help.webp";
 import imgPixel from "@/imports/LpSoarts-1/logo-pixel.webp";
 import imgGacSuperAuto from "@/imports/LpSoarts-1/logo-gac-superauto.png";
+import imgEspecialite from "@/imports/LpSoarts-1/logo-especialite-odontologia.png";
 import svgPaths from "@/imports/LpSoarts-1/svg-0n58f4rxvu";
 
 const ORANGE = "#FF5200";
@@ -33,6 +34,7 @@ const BRANDS = [
   { src: imgGlobo, alt: "Grupo Globo", instagram: "https://www.instagram.com/grupo.globo/" },
   { src: imgHelp, alt: "HelpSmart", instagram: "https://www.instagram.com/help.smartcell/" },
   { src: imgGacSuperAuto, alt: "GAC SuperAuto", instagram: "https://www.instagram.com/gacsuperauto/" },
+  { src: imgEspecialite, alt: "Especialitê Odontologia Integrada", instagram: "https://www.instagram.com/especialiteitajaisc/" },
 ];
 
 /**
