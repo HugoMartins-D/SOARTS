@@ -32,7 +32,7 @@ const BRANDS = [
   { src: imgPromenac, alt: "Promenac/Camvel", instagram: "https://www.instagram.com/promenaccamvel/" },
   { src: imgGlobo, alt: "Grupo Globo", instagram: "https://www.instagram.com/grupo.globo/" },
   { src: imgHelp, alt: "HelpSmart", instagram: "https://www.instagram.com/help.smartcell/" },
-  { src: imgGacSuperAuto, alt: "GAC SuperAuto", instagram: "" },
+  { src: imgGacSuperAuto, alt: "GAC SuperAuto", instagram: "https://www.instagram.com/gacsuperauto/" },
 ];
 
 /**
