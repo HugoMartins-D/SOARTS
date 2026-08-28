@@ -3,15 +3,22 @@ const JPEG_QUALITY = 0.82;
 
 /**
  * Reduz o tamanho de uma foto no navegador antes do upload: redimensiona
- * pro lado maior caber em 2000px e recodifica como JPEG. Fotos de câmera de
- * celular hoje chegam a 12-16MB e demoram muito pra carregar no site,
- * principalmente no mobile — isso é o que resolve. Cai pro arquivo original
- * se a compressão falhar ou não reduzir o tamanho.
+ * pro lado maior caber em `maxDimension` e recodifica como JPEG. Fotos de
+ * câmera de celular hoje chegam a 12-16MB e demoram muito pra carregar no
+ * site, principalmente no mobile — isso é o que resolve. Cai pro arquivo
+ * original se a compressão falhar ou não reduzir o tamanho.
+ *
+ * `maxDimension`/`quality` têm default pra imagem de detalhe (foto
+ * principal, galeria); quem gera uma capa de card deve passar valores bem
+ * menores (ver `thumbFile` em AdminPage) — cabe em muito menos espaço.
  */
-export async function compressImage(file: File): Promise<File> {
+export async function compressImage(
+  file: File,
+  { maxDimension = MAX_DIMENSION, quality = JPEG_QUALITY }: { maxDimension?: number; quality?: number } = {},
+): Promise<File> {
   try {
     const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
 
@@ -24,7 +31,7 @@ export async function compressImage(file: File): Promise<File> {
     bitmap.close();
 
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", JPEG_QUALITY),
+      canvas.toBlob(resolve, "image/jpeg", quality),
     );
     if (!blob) return file;
 
