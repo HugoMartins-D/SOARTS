@@ -10,6 +10,11 @@ import { extractVideoFrame } from "@/utils/extractVideoFrame";
 
 const ORANGE = "#FF5200";
 
+// Capa é miniatura de card, não imagem de detalhe — bem menor que a foto
+// principal (ver `compressImage`). Menor egress do Storage a cada visita,
+// já que a Home baixa a capa de todo projeto listado.
+const THUMBNAIL_OPTS = { maxDimension: 640, quality: 0.72 };
+
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -91,6 +96,7 @@ function Dashboard() {
   const [compressProgress, setCompressProgress] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [generatingCoverId, setGeneratingCoverId] = useState<string | null>(null);
+  const [optimizeProgress, setOptimizeProgress] = useState<{ done: number; total: number } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const loadProjects = useCallback(async () => {
@@ -230,7 +236,7 @@ function Dashboard() {
       // above can be saved on their own without touching storage at all.
       if (mediaFile) {
         let fileToUpload = mediaFile;
-        let posterFile: File | null = thumbFile ? await compressImage(thumbFile) : null;
+        let posterFile: File | null = thumbFile ? await compressImage(thumbFile, THUMBNAIL_OPTS) : null;
 
         if (form.category === "video") {
           setCompressProgress(0);
@@ -272,7 +278,7 @@ function Dashboard() {
         // Trocar só a capa, sem reenviar o vídeo — evita comprimir de novo
         // um arquivo que já está bom, só pra atualizar a imagem de capa.
         const previous = projects.find((p) => p.id === editingId);
-        const posterFile = await compressImage(thumbFile);
+        const posterFile = await compressImage(thumbFile, THUMBNAIL_OPTS);
         const folderId = previous?.media_path?.split("/")[0] ?? crypto.randomUUID();
         const thumbExt = posterFile.name.split(".").pop() ?? "jpg";
         const thumbnailPath = `${folderId}/thumb.${thumbExt}`;
@@ -382,6 +388,42 @@ function Dashboard() {
     await loadProjects();
   }
 
+  // Reprocessa as capas já publicadas pro tamanho reduzido de miniatura
+  // (ver THUMBNAIL_OPTS) — projetos antigos foram salvos com a capa no
+  // tamanho de imagem cheia, e é isso que pesa no egress do Storage a cada
+  // visita à Home. Roda uma vez, sob demanda, no navegador do admin: só a
+  // sessão autenticada tem permissão de escrita no bucket.
+  async function handleOptimizeThumbnails() {
+    const targets = projects.filter((p) => p.thumbnail_path);
+    if (!targets.length) return;
+    if (
+      !confirm(
+        `Reprocessar ${targets.length} capa(s) já publicadas para um tamanho menor? As imagens atuais serão substituídas.`,
+      )
+    )
+      return;
+
+    setOptimizeProgress({ done: 0, total: targets.length });
+    for (const project of targets) {
+      try {
+        const res = await fetch(publicMediaUrl(project.thumbnail_path!));
+        if (!res.ok) throw new Error("Download da capa atual falhou.");
+        const blob = await res.blob();
+        const original = new File([blob], "thumb.jpg", { type: blob.type || "image/jpeg" });
+        const resized = await compressImage(original, THUMBNAIL_OPTS);
+        const { error } = await supabase.storage
+          .from("project-media")
+          .upload(project.thumbnail_path!, resized, { upsert: true, cacheControl: "31536000" });
+        if (error) throw error;
+      } catch (err) {
+        console.error(`Falha ao otimizar capa de "${project.title}":`, err);
+      } finally {
+        setOptimizeProgress((prev) => (prev ? { ...prev, done: prev.done + 1 } : prev));
+      }
+    }
+    setOptimizeProgress(null);
+  }
+
   return (
     <div className="min-h-screen bg-black text-white font-['Inter',sans-serif]">
       <header className="flex items-center justify-between px-6 md:px-16 py-6 border-b border-white/10">
@@ -392,6 +434,15 @@ function Dashboard() {
           <h1 className="text-xl font-extrabold">Painel de projetos</h1>
         </div>
         <div className="flex items-center gap-4">
+          <button
+            onClick={handleOptimizeThumbnails}
+            disabled={optimizeProgress !== null}
+            className="text-sm text-white/60 hover:text-white transition-colors border border-white/15 rounded-full px-4 py-2 disabled:opacity-50"
+          >
+            {optimizeProgress
+              ? `Otimizando capas… ${optimizeProgress.done}/${optimizeProgress.total}`
+              : "Otimizar capas existentes"}
+          </button>
           <a href="/" className="text-white/60 text-sm hover:text-white transition-colors">
             Ver site
           </a>

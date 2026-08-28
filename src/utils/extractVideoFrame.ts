@@ -1,3 +1,9 @@
+// Capa é só uma miniatura de card, não uma imagem de detalhe — cabe em bem
+// menos que a resolução do vídeo (até 1280px). Isso é o que mantém o
+// download da Home leve: pesa ~10x menos que extrair no tamanho nativo.
+const THUMBNAIL_MAX_DIMENSION = 640;
+const THUMBNAIL_QUALITY = 0.72;
+
 /**
  * Extrai um frame do vídeo no navegador pra usar como capa automática
  * quando o admin não envia uma. Sem uma capa de verdade, o card depende do
@@ -32,22 +38,26 @@ export async function extractVideoFrame(file: File, atSeconds = 1): Promise<File
 
     video.addEventListener("seeked", () => {
       try {
+        const scale = Math.min(
+          1,
+          THUMBNAIL_MAX_DIMENSION / Math.max(video.videoWidth, video.videoHeight),
+        );
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = Math.round(video.videoWidth * scale);
+        canvas.height = Math.round(video.videoHeight * scale);
         const ctx = canvas.getContext("2d");
         if (!ctx || !canvas.width || !canvas.height) {
           clearTimeout(timeout);
           return finish(null);
         }
-        ctx.drawImage(video, 0, 0);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(
           (blob) => {
             clearTimeout(timeout);
             finish(blob ? new File([blob], "poster.jpg", { type: "image/jpeg" }) : null);
           },
           "image/jpeg",
-          0.85,
+          THUMBNAIL_QUALITY,
         );
       } catch (err) {
         console.error("Falha ao extrair frame do vídeo:", err);
