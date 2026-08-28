@@ -248,9 +248,13 @@ function Dashboard() {
         const mediaExt = fileToUpload.name.split(".").pop() ?? "bin";
         const mediaPath = `${id}/media.${mediaExt}`;
 
+        // cacheControl de 1 ano: esse caminho (pasta com id novo) nunca é
+        // reaproveitado para outro conteúdo, então dá pra deixar o navegador
+        // e o CDN guardarem o arquivo indefinidamente — corta egress repetido
+        // pra quem já visitou o site antes.
         const { error: mediaErr } = await supabase.storage
           .from("project-media")
-          .upload(mediaPath, fileToUpload);
+          .upload(mediaPath, fileToUpload, { cacheControl: "31536000" });
         if (mediaErr) throw mediaErr;
         updates.media_path = mediaPath;
 
@@ -260,7 +264,7 @@ function Dashboard() {
           thumbnailPath = `${id}/thumb.${thumbExt}`;
           const { error: thumbErr } = await supabase.storage
             .from("project-media")
-            .upload(thumbnailPath, posterFile);
+            .upload(thumbnailPath, posterFile, { cacheControl: "31536000" });
           if (thumbErr) throw thumbErr;
         }
         updates.thumbnail_path = thumbnailPath;
@@ -323,7 +327,7 @@ function Dashboard() {
           const path = `${crypto.randomUUID()}/photo.${ext}`;
           const { error: uploadErr } = await supabase.storage
             .from("project-media")
-            .upload(path, file);
+            .upload(path, file, { cacheControl: "31536000" });
           if (uploadErr) throw uploadErr;
           newPhotos.push({ project_id: projectId, path });
         }

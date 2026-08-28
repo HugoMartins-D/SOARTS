@@ -154,6 +154,24 @@ function CategoryIcon({ category, className }: { category: Project["category"]; 
  * exatamente o que os cards da antiga grade abaixo do carrossel já faziam.
  */
 function ProjectRowCard({ project, onSelect }: { project: Project; onSelect: () => void }) {
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Só começa a baixar/tocar o vídeo depois de um hover sustentado — sem
+  // isso, cada passada rápida do mouse pelo carrossel (comum ao arrastar
+  // com o Embla) dispara `play()` e puxa dados de vídeo do Supabase à toa,
+  // consumindo egress sem o usuário nunca ter visto o preview de verdade.
+  function handleMouseEnter(e: React.MouseEvent<HTMLVideoElement>) {
+    const video = e.currentTarget;
+    hoverTimeoutRef.current = setTimeout(() => video.play(), 250);
+  }
+
+  function handleMouseLeave(e: React.MouseEvent<HTMLVideoElement>) {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    const video = e.currentTarget;
+    video.pause();
+    video.currentTime = 0;
+  }
+
   return (
     <div
       role="button"
@@ -181,11 +199,8 @@ function ProjectRowCard({ project, onSelect }: { project: Project; onSelect: () 
           playsInline
           preload="metadata"
           className="absolute inset-0 w-full h-full object-cover"
-          onMouseEnter={(e) => e.currentTarget.play()}
-          onMouseLeave={(e) => {
-            e.currentTarget.pause();
-            e.currentTarget.currentTime = 0;
-          }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         />
       ) : project.image ? (
         <img
