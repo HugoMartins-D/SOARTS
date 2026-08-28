@@ -28,7 +28,7 @@ async function getFFmpeg(): Promise<FFmpeg> {
 
 /**
  * Re-encodes a video in the browser (H.264/AAC, longest edge capped at
- * 1280px) before it's uploaded, so what ends up hosted is the reduced
+ * 960px) before it's uploaded, so what ends up hosted is the reduced
  * version rather than the raw camera/phone file. Falls back to the original
  * file whenever ffmpeg.wasm can't load or the transcode fails/doesn't shrink
  * the file, so a failed compression never blocks the upload itself.
@@ -64,17 +64,17 @@ export async function compressVideo(
       "-i",
       inputName,
       "-vf",
-      "scale='min(1280,iw)':'min(1280,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2",
+      "scale='min(960,iw)':'min(960,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2",
       "-c:v",
       "libx264",
       "-preset",
       "veryfast",
       "-crf",
-      "28",
+      "31",
       "-c:a",
       "aac",
       "-b:a",
-      "128k",
+      "96k",
       "-movflags",
       "+faststart",
       outputName,
